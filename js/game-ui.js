@@ -24,7 +24,9 @@
     adNoticeModal = $("adNoticeModal"), adNoticeText = $("adNoticeText"), adNoticeOkBtn = $("adNoticeOkBtn"),
     userCoinsLabel = $("userCoinsLabel"), coinsValueEl = $("coinsValue"), userCoinsWrap = $("userCoinsWrap"),
     langRuBtn = $("langRuBtn"), langEnBtn = $("langEnBtn"),
-    robotModeBtn = $("robotModeBtn");
+    robotModeBtn = $("robotModeBtn"),
+    donateModal = $("donateModal"), donateFabBtn = $("donateFabBtn"),
+    donateModalCloseBtn = $("donateModalCloseBtn"), donateSubmitBtn = $("donateSubmitBtn");
 
   var celebrationTimers = [];
 
@@ -113,6 +115,17 @@
     if ($("disconnectOnlineBtn")) $("disconnectOnlineBtn").textContent = t("disconnect");
     if ($("shareVkBtn")) $("shareVkBtn").textContent = t("shareRoomVk");
     if ($("inviteVkBtn")) $("inviteVkBtn").textContent = t("inviteVkFriends");
+    if (donateFabBtn) {
+      donateFabBtn.setAttribute("aria-label", t("donateFabAria"));
+      donateFabBtn.setAttribute("title", t("donateFabAria"));
+    }
+    if ($("donateModalTitle")) $("donateModalTitle").textContent = t("donateTitle");
+    if ($("donateModalText")) $("donateModalText").textContent = t("donateBody");
+    if (donateSubmitBtn) donateSubmitBtn.textContent = t("donateSubmit");
+    if (donateModalCloseBtn) {
+      donateModalCloseBtn.setAttribute("aria-label", t("donateCloseAria"));
+      donateModalCloseBtn.setAttribute("title", t("donateCloseAria"));
+    }
     G.applyBoardLayout();
     G.updateDifficultyCurrentLabel();
     G.updateStatsUI();
@@ -126,6 +139,18 @@
   };
 
   G.closeAdNoticeModal = function () { if (adNoticeModal) adNoticeModal.classList.remove("show"); };
+
+  G.openDonateModal = function () {
+    var hint = $("donateVkOnlyHint");
+    if (hint) hint.hidden = true;
+    if (donateModal) donateModal.classList.add("show");
+    if (donateFabBtn) donateFabBtn.setAttribute("aria-expanded", "true");
+  };
+
+  G.closeDonateModal = function () {
+    if (donateModal) donateModal.classList.remove("show");
+    if (donateFabBtn) donateFabBtn.setAttribute("aria-expanded", "false");
+  };
 
   G.openAdNoticeBeforeNewGame = function () {
     G.closeModal();
@@ -816,12 +841,17 @@
   resultModal.addEventListener("click", function (e) { if (e.target === resultModal) G.closeModal(); });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
-      closeDiff(); closeBoardSize(); G.closeModal(); G.closeShop(); G.closeAdNoticeModal(); G.closeLeaderboard();
+      closeDiff(); closeBoardSize(); G.closeModal(); G.closeShop(); G.closeAdNoticeModal(); G.closeLeaderboard(); G.closeDonateModal();
     }
   });
 
   if (adNoticeOkBtn) adNoticeOkBtn.addEventListener("click", function () { afterAdNoticeConfirmed(); });
   if (adNoticeModal) adNoticeModal.addEventListener("click", function (e) { if (e.target === adNoticeModal) G.closeAdNoticeModal(); });
+
+  if (donateFabBtn) donateFabBtn.addEventListener("click", function () { G.openDonateModal(); });
+  if (donateModalCloseBtn) donateModalCloseBtn.addEventListener("click", function () { G.closeDonateModal(); });
+  if (donateModal) donateModal.addEventListener("click", function (e) { if (e.target === donateModal) G.closeDonateModal(); });
+  if (donateSubmitBtn) donateSubmitBtn.addEventListener("click", function () { if (G.openVotesDonate) G.openVotesDonate(); });
 
   if (lbRefreshBtn) lbRefreshBtn.addEventListener("click", function () { G.openLeaderboard(); });
   if (lbToggleBtn) lbToggleBtn.addEventListener("click", function () { G.toggleLeaderboardDrawer(); });
@@ -870,5 +900,6 @@
     G.updateRobotDependentUI(); G.updateStatsUI(); G.updateCoinsUI();
     G.resetGame();
     G.closeLeaderboard();
+    G.closeDonateModal();
   };
 })(window.Game);

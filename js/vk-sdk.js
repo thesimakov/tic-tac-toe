@@ -248,6 +248,54 @@
     G.loadLeaderboard = function () {
       if (G.renderLeaderboard) G.renderLeaderboard([]);
     };
+
+    function getVkAppIdFromQuery() {
+      try {
+        var q = new URLSearchParams(window.location.search);
+        var id = parseInt(q.get("vk_app_id") || "0", 10);
+        return id > 0 ? id : null;
+      } catch (e) { return null; }
+    }
+
+    function getDonateGroupIdFromMeta() {
+      var m = document.querySelector('meta[name="vk-donate-group-id"]');
+      if (!m || !m.content) return null;
+      var n = parseInt(String(m.content).trim(), 10);
+      return Number.isNaN(n) || n <= 0 ? null : n;
+    }
+
+    G.openVotesDonate = function () {
+      var b = getBridge();
+      var hint = document.getElementById("donateVkOnlyHint");
+      var appId = getVkAppIdFromQuery();
+      if (hint) hint.hidden = true;
+
+      if (!b || !appId) {
+        if (hint) {
+          hint.textContent = G.t("donateVkOnlyHintText");
+          hint.hidden = false;
+        }
+        return;
+      }
+
+      var amount = typeof G.VK_DONATE_MIN_VOTES === "number" ? G.VK_DONATE_MIN_VOTES : 7;
+      var desc = G.t("donatePayDescription");
+      var groupId = getDonateGroupIdFromMeta();
+      var payload = groupId
+        ? { app_id: appId, action: "pay-to-group", params: { group_id: groupId, amount: amount, description: desc } }
+        : { app_id: appId, action: "pay-to-service", params: { amount: amount, description: desc } };
+
+      b.send("VKWebAppOpenPayForm", payload)
+        .then(function () {
+          if (G.closeDonateModal) G.closeDonateModal();
+        })
+        .catch(function () {
+          if (hint) {
+            hint.textContent = G.t("donateBridgeFail");
+            hint.hidden = false;
+          }
+        });
+    };
   }
 
   G.initVkSDK = function () {

@@ -79,7 +79,15 @@ window.Game = window.Game || {};
       playOnline: "Онлайн",
       switchToOnline: "Играть онлайн",
       switchToRobot: "Играть с роботом",
-      connectToPlay: "Найдите соперника или введите код комнаты."
+      connectToPlay: "Найдите соперника или введите код комнаты.",
+      donateFabAria: "Поддержать проект",
+      donateTitle: "Ваш донат важен для нас",
+      donateBody: "Спасибо за поддержку. По кнопке ниже откроется форма оплаты голосами ВКонтакте.",
+      donateSubmit: "Пожертвовать",
+      donatePayDescription: "Пожертвование на развитие игры",
+      donateVkOnlyHintText: "Оплата голосами доступна в приложении ВКонтакте.",
+      donateCloseAria: "Закрыть окно доната",
+      donateBridgeFail: "Не удалось открыть форму оплаты. Попробуйте позже."
     },
     en: {
       title: "Tic-Tac-Toe",
@@ -154,7 +162,15 @@ window.Game = window.Game || {};
       playOnline: "Online",
       switchToOnline: "Play online",
       switchToRobot: "Play vs bot",
-      connectToPlay: "Find an opponent or enter a room code."
+      connectToPlay: "Find an opponent or enter a room code.",
+      donateFabAria: "Support the project",
+      donateTitle: "Your donation means a lot",
+      donateBody: "Thank you. You can open VK’s in-app payment form using votes below.",
+      donateSubmit: "Donate",
+      donateVkOnlyHintText: "Vote payments are available in the VK app.",
+      donatePayDescription: "Donation to support the game",
+      donateCloseAria: "Close donation dialog",
+      donateBridgeFail: "Could not open the payment form. Try again later."
     }
   };
 
@@ -294,6 +310,17 @@ window.Game = window.Game || {};
 
   G.disconnectOnlineSession = function () {};
   G.initOnline = function () {};
+
+  /** Минимальная сумма в голосах для VKWebAppOpenPayForm (при необходимости измените). */
+  G.VK_DONATE_MIN_VOTES = 7;
+
+  G.openVotesDonate = function () {
+    var el = document.getElementById("donateVkOnlyHint");
+    if (el) {
+      el.textContent = G.t("donateVkOnlyHintText");
+      el.hidden = false;
+    }
+  };
 
   G.getCenterCellIndices = function () {
     var n = G.boardSize, c0 = Math.floor((n - 1) / 2), c1 = Math.ceil((n - 1) / 2), out = [];

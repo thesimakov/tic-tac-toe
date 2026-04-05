@@ -6,12 +6,13 @@
 
   function detectLang(ysdk) {
     try {
-      var sdkLang = ysdk.environment.i18n.lang;
-      if (sdkLang && G.texts[sdkLang]) return sdkLang;
-      if (sdkLang && sdkLang.startsWith("ru")) return "ru";
-      if (sdkLang && sdkLang.startsWith("en")) return "en";
+      var raw = ysdk.environment.i18n.lang;
+      if (raw) {
+        var base = String(raw).split("-")[0].toLowerCase();
+        if (G.isLangSupported && G.isLangSupported(base)) return base;
+      }
     } catch (e) {}
-    return "ru";
+    return G.detectLocaleLang ? G.detectLocaleLang() : "ru";
   }
 
   function initPayments(ysdk) {
@@ -186,14 +187,22 @@
       var s = data.settings;
 
       if (s) {
+        if (Array.isArray(s.ownedSkins)) G.ownedSkins = s.ownedSkins;
+        if (s.skinLeaseExpiry && typeof s.skinLeaseExpiry === "object") {
+          G.skinLeaseExpiry = {};
+          Object.keys(s.skinLeaseExpiry).forEach(function (k) {
+            var v = s.skinLeaseExpiry[k];
+            if (typeof v === "number" && !Number.isNaN(v)) G.skinLeaseExpiry[k] = v;
+          });
+        }
+        if (s.showAds === false) G.showAds = false;
+        if (typeof s.adsFreeUntil === "number" && !Number.isNaN(s.adsFreeUntil)) G.adsFreeUntil = s.adsFreeUntil;
+        if (G.isLangSupported && G.isLangSupported(s.manualLang)) G.manualLang = s.manualLang;
         if (s.skin && G.applySkin) {
           G.activeSkin = s.skin;
           G.applySkin(s.skin);
         }
-        if (Array.isArray(s.ownedSkins)) G.ownedSkins = s.ownedSkins;
-        if (s.showAds === false) G.showAds = false;
-        if (typeof s.adsFreeUntil === "number" && !Number.isNaN(s.adsFreeUntil)) G.adsFreeUntil = s.adsFreeUntil;
-        if (s.manualLang === "ru" || s.manualLang === "en") G.manualLang = s.manualLang;
+        if (G.validateActiveSkinLease) G.validateActiveSkinLease();
       }
 
       if (typeof cloudStats.coins === "number" && !Number.isNaN(cloudStats.coins)) {
@@ -212,7 +221,7 @@
       if (hd) G.stats.draws = cloudStats.draws;
       else if (s && s.stats) G.stats.draws = s.stats.draws || 0;
 
-      if (!G.getUrlLang() && (G.manualLang === "ru" || G.manualLang === "en")) G.lang = G.manualLang;
+      if (!G.getUrlLang() && G.isLangSupported && G.isLangSupported(G.manualLang)) G.lang = G.manualLang;
       if (G.updateStatsUI) G.updateStatsUI();
       if (G.updateCoinsUI) G.updateCoinsUI();
       if (G.applyI18n) G.applyI18n();
@@ -229,12 +238,13 @@
     var settings = {
       skin: G.activeSkin,
       ownedSkins: G.ownedSkins,
+      skinLeaseExpiry: G.skinLeaseExpiry && typeof G.skinLeaseExpiry === "object" ? G.skinLeaseExpiry : {},
       showAds: G.showAds,
       stats: { wins: G.stats.wins, losses: G.stats.losses, draws: G.stats.draws },
       coins: Math.max(0, Math.floor(G.coins || 0))
     };
     if (typeof G.adsFreeUntil === "number" && !Number.isNaN(G.adsFreeUntil)) settings.adsFreeUntil = G.adsFreeUntil;
-    if (G.manualLang === "ru" || G.manualLang === "en") settings.manualLang = G.manualLang;
+    if (G.isLangSupported && G.isLangSupported(G.manualLang)) settings.manualLang = G.manualLang;
 
     var flush = true;
     var pData = G.player.setData({ settings: settings }, flush);
@@ -304,7 +314,7 @@
   /* ---- SDK init ---- */
   G.initYandexSDK = function () {
     if (typeof YaGames === "undefined") {
-      G.lang = G.getUrlLang() || G.lang || "ru";
+      if (G.resolveLanguageAfterLoad) G.resolveLanguageAfterLoad();
       G.applyI18n(); G.initUI();
       if (G.initOnline) G.initOnline();
       if (G.openLeaderboard) G.openLeaderboard();
@@ -325,7 +335,7 @@
       G.initUI();
       if (G.initOnline) G.initOnline();
     }).catch(function () {
-      G.lang = G.getUrlLang() || G.lang || "ru";
+      if (G.resolveLanguageAfterLoad) G.resolveLanguageAfterLoad();
       G.applyI18n(); G.initUI();
       if (G.initOnline) G.initOnline();
       if (G.openLeaderboard) G.openLeaderboard();

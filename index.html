@@ -28,9 +28,8 @@
   <main class="app" id="appMain" aria-label="Крестики-нолики">
 
     <div class="user-bar" id="userBar">
-      <div class="lang-switch" id="langSwitchGroup" role="group">
-        <button type="button" class="btn btn-tiny lang-btn" id="langRuBtn" aria-pressed="true">RU</button>
-        <button type="button" class="btn btn-tiny lang-btn" id="langEnBtn" aria-pressed="false">EN</button>
+      <div class="lang-switch" id="langSwitchGroup">
+        <select id="langSelect" class="lang-select" aria-label=""></select>
       </div>
       <button type="button" class="lb-mobile-toggle" id="lbToggleBtn" aria-expanded="false" aria-controls="leaderboardPanel" title="Рейтинг">
         <svg class="lb-mobile-toggle-svg" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -147,14 +146,22 @@
   <div class="modal ad-notice-modal" id="adNoticeModal" role="dialog" aria-modal="true" aria-labelledby="adNoticeTitle">
     <div class="modal-card">
       <h2 class="modal-title" id="adNoticeTitle">Реклама</h2>
-      <p class="modal-text" id="adNoticeText"></p>
-      <p class="ad-notice-no-ads-title" id="adNoticeNoAdsTitle"></p>
-      <div class="ad-notice-pay-row">
-        <button type="button" class="btn btn-tiny" id="adNoticePayWeekBtn"></button>
-        <button type="button" class="btn btn-tiny accent" id="adNoticePayYearBtn"></button>
+      <p class="modal-text ad-notice-intro" id="adNoticeText"></p>
+      <button type="button" class="btn accent ad-notice-ok-main" id="adNoticeOkBtn">Хорошо</button>
+      <div class="ad-notice-secondary">
+        <div class="ad-notice-disable-row">
+          <input type="checkbox" id="adNoticeDisableAdsCb" class="ad-notice-cb" aria-controls="adNoticePayExpand" aria-expanded="false" />
+          <label for="adNoticeDisableAdsCb" class="ad-notice-cb-label" id="adNoticeDisableAdsLabel"></label>
+        </div>
+        <div id="adNoticePayExpand" class="ad-notice-pay-expand" hidden>
+          <select id="adNoticeNoAdsPlan" class="ad-notice-plan-select" aria-label="">
+            <option value="week"></option>
+            <option value="year"></option>
+          </select>
+          <button type="button" class="btn accent ad-notice-pay-submit" id="adNoticePayBtn"></button>
+          <p class="donate-modal-hint donate-modal-hint--vk ad-notice-pay-hint" id="adNoticePayHint" hidden></p>
+        </div>
       </div>
-      <p class="donate-modal-hint donate-modal-hint--vk" id="adNoticePayHint" hidden></p>
-      <button class="btn accent" id="adNoticeOkBtn" type="button">Хорошо</button>
     </div>
   </div>
 
@@ -172,6 +179,8 @@
         <span class="shop-dismiss-icon" aria-hidden="true"></span>
       </button>
       <h2 class="shop-title" id="shopCardTitle">Магазин</h2>
+      <p class="shop-coin-rate" id="shopCoinRate"></p>
+      <p class="shop-purchase-hint" id="shopPurchaseHint" hidden></p>
       <div class="shop-notice" id="shopCourierBlock">
         <p class="shop-notice-text" id="shopCourierText"></p>
         <a class="btn shop-subscribe" id="shopVkLink" href="https://vk.com/lemnitygame" target="_blank" rel="noopener noreferrer">Подписаться</a>
@@ -188,9 +197,14 @@
   <div class="wow-layer" id="wowLayer"></div>
 
   <button type="button" class="donate-fab" id="donateFabBtn" aria-haspopup="dialog" aria-controls="donateModal" aria-expanded="false">
-    <svg class="donate-fab-icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">
-      <path fill="currentColor" d="M19 7h-2.18C16.55 4.17 13.98 2.5 11 2.5S5.45 4.17 4.18 7H3a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9-2.5c1.38 0 2.5 1.12 2.5 2.5H7.5c0-1.38 1.12-2.5 2.5-2.5z"/>
-    </svg>
+    <span class="donate-fab-coins" aria-hidden="true">
+      <span class="donate-fab-coin" style="--dx:-38px; --delay:0s;"></span>
+      <span class="donate-fab-coin" style="--dx:-8px; --delay:0.28s;"></span>
+      <span class="donate-fab-coin" style="--dx:36px; --delay:0.52s;"></span>
+    </span>
+    <span class="donate-fab-stage" aria-hidden="true">
+      <span class="donate-fab-emoji">🐷</span>
+    </span>
   </button>
 
   <div class="modal donate-modal" id="donateModal" role="dialog" aria-modal="true" aria-labelledby="donateModalTitle">
@@ -206,6 +220,7 @@
   </div>
 
   <script src="js/game-core.js"></script>
+  <script src="js/i18n-cis.js"></script>
   <script src="js/game-ai.js"></script>
   <script src="js/game-ui.js"></script>
   <script src="js/game-online.js"></script>

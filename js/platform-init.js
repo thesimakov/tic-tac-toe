@@ -26,7 +26,7 @@
       function () {
         if (G.initVkSDK) G.initVkSDK();
         else {
-          G.lang = G.getUrlLang() || G.lang || "ru";
+          if (G.resolveLanguageAfterLoad) G.resolveLanguageAfterLoad();
           G.applyI18n();
           G.initUI();
           if (G.initOnline) G.initOnline();
@@ -35,7 +35,7 @@
       function () {
         if (G.initVkSDK) G.initVkSDK();
         else {
-          G.lang = G.getUrlLang() || G.lang || "ru";
+          if (G.resolveLanguageAfterLoad) G.resolveLanguageAfterLoad();
           G.applyI18n();
           G.initUI();
           if (G.initOnline) G.initOnline();

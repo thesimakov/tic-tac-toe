@@ -32,16 +32,19 @@
 
   function applySettingsPayload(settings) {
     if (!settings || typeof settings !== "object") return;
-    if (settings.skin && G.applySkin) {
-      G.activeSkin = settings.skin;
-      G.applySkin(settings.skin);
-    }
     if (Array.isArray(settings.ownedSkins)) G.ownedSkins = settings.ownedSkins.slice();
+    if (settings.skinLeaseExpiry && typeof settings.skinLeaseExpiry === "object") {
+      G.skinLeaseExpiry = {};
+      Object.keys(settings.skinLeaseExpiry).forEach(function (k) {
+        var v = settings.skinLeaseExpiry[k];
+        if (typeof v === "number" && !Number.isNaN(v)) G.skinLeaseExpiry[k] = v;
+      });
+    }
     if (settings.showAds === false) G.showAds = false;
     if (typeof settings.adsFreeUntil === "number" && !Number.isNaN(settings.adsFreeUntil)) {
       G.adsFreeUntil = settings.adsFreeUntil;
     }
-    if (settings.manualLang === "ru" || settings.manualLang === "en") G.manualLang = settings.manualLang;
+    if (G.isLangSupported && G.isLangSupported(settings.manualLang)) G.manualLang = settings.manualLang;
 
     if (typeof settings.coins === "number" && !Number.isNaN(settings.coins)) {
       G.coins = Math.max(0, Math.floor(settings.coins));
@@ -51,7 +54,12 @@
       if (typeof settings.stats.losses === "number") G.stats.losses = settings.stats.losses;
       if (typeof settings.stats.draws === "number") G.stats.draws = settings.stats.draws;
     }
-    if (!G.getUrlLang() && (G.manualLang === "ru" || G.manualLang === "en")) G.lang = G.manualLang;
+    if (settings.skin && G.applySkin) {
+      G.activeSkin = settings.skin;
+      G.applySkin(settings.skin);
+    }
+    if (G.validateActiveSkinLease) G.validateActiveSkinLease();
+    if (!G.getUrlLang() && G.isLangSupported && G.isLangSupported(G.manualLang)) G.lang = G.manualLang;
     if (G.updateStatsUI) G.updateStatsUI();
     if (G.updateCoinsUI) G.updateCoinsUI();
     if (G.applyI18n) G.applyI18n();
@@ -79,12 +87,22 @@
     return null;
   }
 
+  function staticCatalogRow(id, titleKey, descKey) {
+    var spec = G.shopCoinPrices && G.shopCoinPrices[id];
+    var pv = "—";
+    if (spec) {
+      pv = String(spec.coins) + " " + G.t("shopCoinsShort");
+      if (spec.perDay) pv += " " + G.t("shopPerDaySuffix");
+    }
+    return { id: id, title: G.t(titleKey), description: G.t(descKey), priceValue: pv, price: "" };
+  }
+
   function staticCatalog() {
     return [
-      { id: "disable_ads", title: G.t("disableAds"), description: G.t("disableAdsDesc"), priceValue: "—", price: "VK Pay" },
-      { id: "skin_neon", title: G.t("skinNeon"), description: G.t("skinNeonDesc"), priceValue: "—", price: "VK Pay" },
-      { id: "skin_wood", title: G.t("skinWood"), description: G.t("skinWoodDesc"), priceValue: "—", price: "VK Pay" },
-      { id: "skin_space", title: G.t("skinSpace"), description: G.t("skinSpaceDesc"), priceValue: "—", price: "VK Pay" }
+      staticCatalogRow("disable_ads", "disableAds", "disableAdsDesc"),
+      staticCatalogRow("skin_neon", "skinNeon", "skinNeonDesc"),
+      staticCatalogRow("skin_wood", "skinWood", "skinWoodDesc"),
+      staticCatalogRow("skin_space", "skinSpace", "skinSpaceDesc")
     ];
   }
 
@@ -169,6 +187,7 @@
       var settings = {
         skin: G.activeSkin,
         ownedSkins: G.ownedSkins,
+        skinLeaseExpiry: G.skinLeaseExpiry && typeof G.skinLeaseExpiry === "object" ? G.skinLeaseExpiry : {},
         showAds: G.showAds,
         stats: { wins: G.stats.wins, losses: G.stats.losses, draws: G.stats.draws },
         coins: Math.max(0, Math.floor(G.coins || 0))
@@ -176,7 +195,7 @@
       if (typeof G.adsFreeUntil === "number" && !Number.isNaN(G.adsFreeUntil)) {
         settings.adsFreeUntil = G.adsFreeUntil;
       }
-      if (G.manualLang === "ru" || G.manualLang === "en") settings.manualLang = G.manualLang;
+      if (G.isLangSupported && G.isLangSupported(G.manualLang)) settings.manualLang = G.manualLang;
       var payload = JSON.stringify({ settings: settings });
       try { localStorage.setItem(LS_FALLBACK, payload); } catch (e) {}
       var b = getBridge();
@@ -356,11 +375,11 @@
     wireJoinLinkForVk();
     var b = getBridge();
     if (!b) {
-      G.lang = G.getUrlLang() || G.lang || "ru";
       try {
         var raw = localStorage.getItem(LS_FALLBACK);
         if (raw) parseStorageJson(raw);
       } catch (e0) {}
+      if (G.resolveLanguageAfterLoad) G.resolveLanguageAfterLoad();
       G.applyI18n();
       G.initUI();
       if (G.initOnline) G.initOnline();
@@ -393,7 +412,7 @@
         } catch (e2) {}
       })
       .then(function () {
-        G.lang = G.getUrlLang() || G.lang || "ru";
+        if (G.resolveLanguageAfterLoad) G.resolveLanguageAfterLoad();
         G.applyI18n();
         catalogCache = staticCatalog();
         if (G.renderShopItems) G.renderShopItems(catalogCache);

@@ -65,6 +65,8 @@ window.Game = window.Game || {};
       adNoticeBody: "Сейчас будет небольшая реклама, мы дарим Вам за это 10 монет, на эти монеты скоро можно купить скины.",
       adNoticeOk: "Хорошо",
       adNoAdsOffer: "Отключить рекламу",
+      adPayPlanAria: "Период без рекламы",
+      adPaySubmit: "Оплатить голосами",
       adPayWeekBtn: "100 ₽ голосами · неделя",
       adPayYearBtn: "1500 ₽ голосами · год",
       adPayWeekDesc: "Отключение рекламы на 7 дней",
@@ -91,7 +93,12 @@ window.Game = window.Game || {};
       donatePayDescription: "Пожертвование на развитие игры",
       donateVkOnlyHintText: "Оплата голосами доступна в приложении ВКонтакте.",
       donateCloseAria: "Закрыть окно доната",
-      donateBridgeFail: "Не удалось открыть форму оплаты. Попробуйте позже."
+      donateBridgeFail: "Не удалось открыть форму оплаты. Попробуйте позже.",
+      shopCoinVoteRate: "1 монета = 1 голосу",
+      shopCoinsShort: "монет",
+      shopPerDaySuffix: "(сутки)",
+      shopNotEnoughCoins: "Недостаточно монет.",
+      shopPurchaseOk: "Покупка оформлена!"
     },
     en: {
       title: "Tic-Tac-Toe",
@@ -152,6 +159,8 @@ window.Game = window.Game || {};
       adNoticeBody: "A short ad will play now. We’ll give you 10 coins for watching — you’ll soon be able to spend them on skins.",
       adNoticeOk: "OK",
       adNoAdsOffer: "Remove ads",
+      adPayPlanAria: "Ad-free period",
+      adPaySubmit: "Pay with votes",
       adPayWeekBtn: "100 ₽ in votes · 1 week",
       adPayYearBtn: "1500 ₽ in votes · 1 year",
       adPayWeekDesc: "No ads for 7 days",
@@ -178,28 +187,84 @@ window.Game = window.Game || {};
       donateVkOnlyHintText: "Vote payments are available in the VK app.",
       donatePayDescription: "Donation to support the game",
       donateCloseAria: "Close donation dialog",
-      donateBridgeFail: "Could not open the payment form. Try again later."
+      donateBridgeFail: "Could not open the payment form. Try again later.",
+      shopCoinVoteRate: "1 coin = 1 vote",
+      shopCoinsShort: "coins",
+      shopPerDaySuffix: "(per day)",
+      shopNotEnoughCoins: "Not enough coins.",
+      shopPurchaseOk: "Purchase complete!"
     }
   };
 
-  /** Выбранный вручную язык: null = только SDK / URL при старте */
+  /** Выбранный вручную язык: null = авто (браузер / регион / SDK). */
   G.manualLang = null;
 
+  G.isLangSupported = function (code) {
+    return Boolean(code && G.texts && G.texts[code]);
+  };
+
+  G.detectLocaleLang = function () {
+    var list = [];
+    if (typeof navigator.languages !== "undefined" && navigator.languages.length) {
+      for (var i = 0; i < navigator.languages.length; i++) list.push(navigator.languages[i]);
+    }
+    if (navigator.language) list.push(navigator.language);
+    try {
+      list.push(Intl.DateTimeFormat().resolvedOptions().locale);
+    } catch (e0) {}
+    var seen = {};
+    for (var j = 0; j < list.length; j++) {
+      var loc = list[j];
+      if (!loc || seen[loc]) continue;
+      seen[loc] = true;
+      var base = String(loc).split("-")[0].toLowerCase();
+      if (G.isLangSupported(base)) return base;
+    }
+    for (var k = 0; k < list.length; k++) {
+      var loc2 = list[k];
+      if (!loc2) continue;
+      var parts = String(loc2).split("-");
+      if (parts.length >= 2) {
+        var reg = parts[parts.length - 1].replace(/[^a-zA-Z]/g, "").toUpperCase();
+        if (reg === "KZ" && G.isLangSupported("kk")) return "kk";
+        if (reg === "UZ" && G.isLangSupported("uz")) return "uz";
+        if (reg === "TJ" && G.isLangSupported("tg")) return "tg";
+        if (reg === "RU" && G.isLangSupported("ru")) return "ru";
+        if ((reg === "US" || reg === "GB" || reg === "AU") && G.isLangSupported("en")) return "en";
+      }
+    }
+    return "ru";
+  };
+
+  /** Параметр ?lang= в URL (приоритет над облаком при старте). */
+  G.getUrlLang = function () {
+    try {
+      var q = new URLSearchParams(window.location.search).get("lang");
+      if (q && G.isLangSupported(q)) return q;
+    } catch (e) {}
+    return null;
+  };
+
+  /** После загрузки облака: URL → сохранённый вручную → язык/регион браузера. */
+  G.resolveLanguageAfterLoad = function () {
+    var url = G.getUrlLang();
+    if (url) {
+      G.lang = url;
+      return;
+    }
+    if (G.isLangSupported(G.manualLang)) {
+      G.lang = G.manualLang;
+      return;
+    }
+    G.lang = G.detectLocaleLang();
+  };
+
   G.setLanguage = function (code) {
-    if (!G.texts[code]) return;
+    if (!G.isLangSupported(code)) return;
     G.lang = code;
     G.manualLang = code;
     if (G.applyI18n) G.applyI18n();
     if (G.saveCloud) G.saveCloud();
-  };
-
-  /** Параметр ?lang=ru|en в URL (приоритет над облаком при первом показе). */
-  G.getUrlLang = function () {
-    try {
-      var q = new URLSearchParams(window.location.search).get("lang");
-      if (q === "en" || q === "ru") return q;
-    } catch (e) {}
-    return null;
   };
 
   G.t = function (key) {
@@ -234,10 +299,70 @@ window.Game = window.Game || {};
   G.adsFreeUntil = null;
   G.activeSkin = null;
   G.ownedSkins = [];
+  /** Срок аренды тем (мс): skin_id → timestamp окончания. */
+  G.skinLeaseExpiry = {};
   G.lastAdTime = 0;
   G.stats = { wins: 0, losses: 0, draws: 0 };
   G.coins = 0;
   G.COINS_PER_NEW_GAME_AD = 10;
+
+  var SHOP_DAY_MS = 86400000;
+
+  /** Цены в монетах (1 монета = 1 голосу). Темы — аренда на сутки. */
+  G.shopCoinPrices = {
+    disable_ads: { coins: 14, perDay: false },
+    skin_neon: { coins: 5, perDay: true },
+    skin_wood: { coins: 5, perDay: true },
+    skin_space: { coins: 10, perDay: true }
+  };
+
+  G.isShopProductOwned = function (id) {
+    if (id === "disable_ads") return G.showAds === false;
+    if (String(id).indexOf("skin_") !== 0) return false;
+    if (G.ownedSkins.indexOf(id) !== -1) return true;
+    var until = (G.skinLeaseExpiry && G.skinLeaseExpiry[id]) || 0;
+    return until > Date.now();
+  };
+
+  G.validateActiveSkinLease = function () {
+    if (!G.activeSkin || String(G.activeSkin).indexOf("skin_") !== 0) return;
+    if (G.ownedSkins.indexOf(G.activeSkin) !== -1) return;
+    var until = (G.skinLeaseExpiry && G.skinLeaseExpiry[G.activeSkin]) || 0;
+    if (until > Date.now()) return;
+    G.activeSkin = null;
+    if (G.applySkin) G.applySkin(null);
+  };
+
+  G.purchaseShopItem = function (productId) {
+    if (productId === "disable_ads" && G.showAds === false) return;
+    if (String(productId).indexOf("skin_") === 0 && G.ownedSkins.indexOf(productId) !== -1) return;
+    var spec = G.shopCoinPrices && G.shopCoinPrices[productId];
+    if (!spec) {
+      if (G.doPurchase) G.doPurchase(productId);
+      return;
+    }
+    var cost = spec.coins;
+    if (G.coins < cost) {
+      if (G.showShopFlash) G.showShopFlash(G.t("shopNotEnoughCoins"));
+      else if (typeof window !== "undefined" && window.alert) window.alert(G.t("shopNotEnoughCoins"));
+      return;
+    }
+    G.coins = Math.max(0, Math.floor(G.coins - cost));
+    if (productId === "disable_ads") {
+      G.showAds = false;
+    } else if (String(productId).indexOf("skin_") === 0) {
+      if (!G.skinLeaseExpiry) G.skinLeaseExpiry = {};
+      var prev = G.skinLeaseExpiry[productId] || 0;
+      var base = Math.max(Date.now(), prev);
+      G.skinLeaseExpiry[productId] = base + SHOP_DAY_MS;
+      G.activeSkin = productId;
+      if (G.applySkin) G.applySkin(productId);
+    }
+    if (G.updateCoinsUI) G.updateCoinsUI();
+    if (G.saveCloud) G.saveCloud();
+    if (G.showShopFlash) G.showShopFlash(G.t("shopPurchaseOk"));
+    if (G.renderShopItems && G._shopCatalogLast) G.renderShopItems(G._shopCatalogLast);
+  };
 
   /* ---- helpers ---- */
   G.clampBoardSize = function (n) {

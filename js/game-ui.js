@@ -23,13 +23,39 @@
     lbToggleBtn = $("lbToggleBtn"), lbDrawerCloseBtn = $("lbDrawerCloseBtn"),
     adNoticeModal = $("adNoticeModal"), adNoticeText = $("adNoticeText"), adNoticeOkBtn = $("adNoticeOkBtn"),
     userCoinsLabel = $("userCoinsLabel"), coinsValueEl = $("coinsValue"), userCoinsWrap = $("userCoinsWrap"),
-    langRuBtn = $("langRuBtn"), langEnBtn = $("langEnBtn"),
+    langSelect = $("langSelect"),
     robotModeBtn = $("robotModeBtn"),
     modeDifficultyRow = $("modeDifficultyRow"),
     donateModal = $("donateModal"), donateFabBtn = $("donateFabBtn"),
     donateModalCloseBtn = $("donateModalCloseBtn"), donateSubmitBtn = $("donateSubmitBtn");
 
   var celebrationTimers = [];
+
+  function syncAdNoticePayControls() {
+    var tf = G.t.bind(G);
+    var sel = $("adNoticeNoAdsPlan");
+    if (sel) {
+      sel.setAttribute("aria-label", tf("adPayPlanAria"));
+      var ow = sel.querySelector('option[value="week"]');
+      var oy = sel.querySelector('option[value="year"]');
+      if (ow) ow.textContent = tf("adPayWeekBtn");
+      if (oy) oy.textContent = tf("adPayYearBtn");
+    }
+    if ($("adNoticePayBtn")) $("adNoticePayBtn").textContent = tf("adPaySubmit");
+    if ($("adNoticeDisableAdsLabel")) $("adNoticeDisableAdsLabel").textContent = tf("adNoAdsOffer");
+  }
+
+  function resetAdNoticePaySection() {
+    var cb = $("adNoticeDisableAdsCb");
+    var expand = $("adNoticePayExpand");
+    var hint = $("adNoticePayHint");
+    if (cb) {
+      cb.checked = false;
+      cb.setAttribute("aria-expanded", "false");
+    }
+    if (expand) expand.hidden = true;
+    if (hint) hint.hidden = true;
+  }
 
   /* ---- board size options ---- */
   for (var sz = 3; sz <= 10; sz++) {
@@ -44,7 +70,7 @@
   G.applyI18n = function () {
     var t = G.t.bind(G);
     var root = document.documentElement;
-    if (root) root.lang = G.lang === "en" ? "en" : "ru";
+    if (root) root.lang = G.lang || "ru";
 
     document.title = t("title");
     $("titleText").textContent = t("title");
@@ -63,6 +89,7 @@
       $("shopCloseBtn").setAttribute("title", t("close"));
     }
     if ($("shopCardTitle")) $("shopCardTitle").textContent = t("shop");
+    if ($("shopCoinRate")) $("shopCoinRate").textContent = t("shopCoinVoteRate");
     if ($("shopCourierText")) $("shopCourierText").textContent = t("shopCourierNotice");
     if ($("shopVkLink")) {
       $("shopVkLink").textContent = t("subscribeVk");
@@ -79,9 +106,7 @@
     if ($("adNoticeTitle")) $("adNoticeTitle").textContent = t("adNoticeTitle");
     if (adNoticeText) adNoticeText.textContent = t("adNoticeBody");
     if (adNoticeOkBtn) adNoticeOkBtn.textContent = t("adNoticeOk");
-    if ($("adNoticeNoAdsTitle")) $("adNoticeNoAdsTitle").textContent = t("adNoAdsOffer");
-    if ($("adNoticePayWeekBtn")) $("adNoticePayWeekBtn").textContent = t("adPayWeekBtn");
-    if ($("adNoticePayYearBtn")) $("adNoticePayYearBtn").textContent = t("adPayYearBtn");
+    syncAdNoticePayControls();
     if (userCoinsLabel) userCoinsLabel.textContent = t("coins") + ":";
     if (userCoinsWrap) userCoinsWrap.setAttribute("title", t("coins"));
     if ($("appMain")) $("appMain").setAttribute("aria-label", t("title"));
@@ -93,16 +118,20 @@
       modalTitle.textContent = t("gameOver");
       modalText.textContent = t("resultHint");
     }
-    var lsg = $("langSwitchGroup");
-    if (lsg) lsg.setAttribute("aria-label", t("langGroupAria"));
-    var ruB = $("langRuBtn"), enB = $("langEnBtn");
-    if (ruB) {
-      ruB.classList.toggle("active", G.lang === "ru");
-      ruB.setAttribute("aria-pressed", G.lang === "ru" ? "true" : "false");
-    }
-    if (enB) {
-      enB.classList.toggle("active", G.lang === "en");
-      enB.setAttribute("aria-pressed", G.lang === "en" ? "true" : "false");
+    if (langSelect) {
+      if (!langSelect.options.length) {
+        var order = ["ru", "en", "kk", "uz", "tg"];
+        for (var li = 0; li < order.length; li++) {
+          var lc = order[li];
+          if (!G.isLangSupported || !G.isLangSupported(lc)) continue;
+          var opt = document.createElement("option");
+          opt.value = lc;
+          opt.textContent = (G.langNativeNames && G.langNativeNames[lc]) ? G.langNativeNames[lc] : lc.toUpperCase();
+          langSelect.appendChild(opt);
+        }
+      }
+      if (G.isLangSupported && G.isLangSupported(G.lang)) langSelect.value = G.lang;
+      langSelect.setAttribute("aria-label", t("langGroupAria"));
     }
     if ($("onlineSectionTitle")) $("onlineSectionTitle").textContent = t("onlineTitle");
     if ($("findMatchBtn")) $("findMatchBtn").textContent = t("findMatch");
@@ -160,11 +189,10 @@
     if ($("adNoticeTitle")) $("adNoticeTitle").textContent = G.t("adNoticeTitle");
     if (adNoticeText) adNoticeText.textContent = G.t("adNoticeBody");
     if (adNoticeOkBtn) adNoticeOkBtn.textContent = G.t("adNoticeOk");
-    if ($("adNoticeNoAdsTitle")) $("adNoticeNoAdsTitle").textContent = G.t("adNoAdsOffer");
-    if ($("adNoticePayWeekBtn")) $("adNoticePayWeekBtn").textContent = G.t("adPayWeekBtn");
-    if ($("adNoticePayYearBtn")) $("adNoticePayYearBtn").textContent = G.t("adPayYearBtn");
-    var payHint = $("adNoticePayHint");
-    if (payHint) payHint.hidden = true;
+    resetAdNoticePaySection();
+    var selOpen = $("adNoticeNoAdsPlan");
+    if (selOpen && selOpen.value !== "year") selOpen.value = "week";
+    syncAdNoticePayControls();
     if (adNoticeModal) adNoticeModal.classList.add("show");
   };
 
@@ -507,7 +535,7 @@
     pop.style.top = (rect.top + rect.height * c[1]) + "px";
     pop.style.setProperty("--r", (-6 + Math.random() * 12) + "deg");
     wowLayer.appendChild(pop);
-    setTimeout(function () { pop.remove(); }, 840);
+    setTimeout(function () { pop.remove(); }, 1000);
   }
 
   /* ---- modals ---- */
@@ -753,12 +781,43 @@
   var openBoardSize = function () { openPopover(boardSizePopover, boardSizeTrigger, difficultyPopover, difficultyTrigger); };
 
   /* ---- shop ---- */
-  G.openShop = function () { if (shopOverlay) shopOverlay.classList.add("show"); };
+  var shopFlashTimer = null;
+  G.showShopFlash = function (msg) {
+    var el = $("shopPurchaseHint");
+    if (!el) return;
+    if (shopFlashTimer) {
+      clearTimeout(shopFlashTimer);
+      shopFlashTimer = null;
+    }
+    el.textContent = msg || "";
+    el.hidden = !msg;
+    if (msg) {
+      shopFlashTimer = setTimeout(function () {
+        el.hidden = true;
+        el.textContent = "";
+        shopFlashTimer = null;
+      }, 2800);
+    }
+  };
+
+  G.openShop = function () {
+    if (G.validateActiveSkinLease) G.validateActiveSkinLease();
+    if (shopOverlay) shopOverlay.classList.add("show");
+    if (G.renderShopItems && G._shopCatalogLast) G.renderShopItems(G._shopCatalogLast);
+  };
   G.closeShop = function () { if (shopOverlay) shopOverlay.classList.remove("show"); };
   G.renderShopItems = function (catalog) {
     if (!shopItems) return;
+    G._shopCatalogLast = catalog;
     shopItems.innerHTML = "";
     var t = G.t.bind(G);
+    var formatCoinPrice = function (productId, product) {
+      var spec = G.shopCoinPrices && G.shopCoinPrices[productId];
+      if (!spec) return product.priceValue || product.price || "—";
+      var s = String(spec.coins) + " " + t("shopCoinsShort");
+      if (spec.perDay) s += " " + t("shopPerDaySuffix");
+      return s;
+    };
     var descs = {
       disable_ads: { name: t("disableAds"), desc: t("disableAdsDesc") },
       skin_neon: { name: t("skinNeon"), desc: t("skinNeonDesc") },
@@ -767,24 +826,24 @@
     };
     catalog.forEach(function (product) {
       var d = descs[product.id] || { name: product.title, desc: product.description };
-      var owned = (product.id === "disable_ads" && !G.showAds) || G.ownedSkins.indexOf(product.id) !== -1;
+      var permOwned = (product.id === "disable_ads" && !G.showAds) || G.ownedSkins.indexOf(product.id) !== -1;
       var div = document.createElement("div");
-      div.className = "shop-item" + (owned ? " owned" : "");
+      div.className = "shop-item" + (permOwned ? " owned" : "");
       var infoDiv = document.createElement("div"); infoDiv.className = "shop-item-info";
       var nameEl = document.createElement("div"); nameEl.className = "shop-item-name"; nameEl.textContent = d.name;
-      var descEl = document.createElement("div"); descEl.className = "shop-item-desc"; descEl.textContent = owned ? t("owned") : d.desc;
+      var descEl = document.createElement("div"); descEl.className = "shop-item-desc"; descEl.textContent = permOwned ? t("owned") : d.desc;
       infoDiv.appendChild(nameEl); infoDiv.appendChild(descEl); div.appendChild(infoDiv);
-      if (!owned) {
+      if (!permOwned) {
         var priceDiv = document.createElement("div"); priceDiv.className = "shop-item-price";
-        if (product.getPriceCurrencyImage) {
+        if (product.getPriceCurrencyImage && !(G.shopCoinPrices && G.shopCoinPrices[product.id])) {
           var img = document.createElement("img"); img.src = product.getPriceCurrencyImage("small"); img.alt = "";
           priceDiv.appendChild(img);
         }
-        var priceSpan = document.createElement("span"); priceSpan.textContent = product.priceValue || product.price || "?";
+        var priceSpan = document.createElement("span"); priceSpan.textContent = formatCoinPrice(product.id, product);
         priceDiv.appendChild(priceSpan); div.appendChild(priceDiv);
         var btn = document.createElement("button"); btn.type = "button"; btn.className = "btn btn-tiny";
         btn.textContent = t("buy"); btn.dataset.productId = product.id;
-        btn.addEventListener("click", function () { if (G.doPurchase) G.doPurchase(product.id); });
+        btn.addEventListener("click", function () { if (G.purchaseShopItem) G.purchaseShopItem(product.id); });
         div.appendChild(btn);
       }
       shopItems.appendChild(div);
@@ -827,8 +886,7 @@
   playAsXBtn.addEventListener("click", function () { setHumanSymbol("X"); });
   playAsOBtn.addEventListener("click", function () { setHumanSymbol("O"); });
 
-  if (langRuBtn) langRuBtn.addEventListener("click", function () { G.setLanguage("ru"); });
-  if (langEnBtn) langEnBtn.addEventListener("click", function () { G.setLanguage("en"); });
+  if (langSelect) langSelect.addEventListener("change", function () { G.setLanguage(langSelect.value); });
 
   function setRobotLevel(level) { G.robotLevel = level; G.updateLevelButtons(); if (G.robotEnabled) G.resetGame(); }
   difficultyTrigger.addEventListener("click", function (e) { e.stopPropagation(); if (difficultyPopover.hidden) openDiff(); else closeDiff(); });
@@ -857,8 +915,19 @@
   });
 
   if (adNoticeOkBtn) adNoticeOkBtn.addEventListener("click", function () { afterAdNoticeConfirmed(); });
-  if ($("adNoticePayWeekBtn")) $("adNoticePayWeekBtn").addEventListener("click", function () { if (G.openVkPayNoAds) G.openVkPayNoAds("week"); });
-  if ($("adNoticePayYearBtn")) $("adNoticePayYearBtn").addEventListener("click", function () { if (G.openVkPayNoAds) G.openVkPayNoAds("year"); });
+  if ($("adNoticeDisableAdsCb")) $("adNoticeDisableAdsCb").addEventListener("change", function () {
+    var cb = $("adNoticeDisableAdsCb");
+    var expand = $("adNoticePayExpand");
+    var hint = $("adNoticePayHint");
+    if (expand) expand.hidden = !cb || !cb.checked;
+    if (hint && (!cb || !cb.checked)) hint.hidden = true;
+    if (cb) cb.setAttribute("aria-expanded", cb.checked ? "true" : "false");
+  });
+  if ($("adNoticePayBtn")) $("adNoticePayBtn").addEventListener("click", function () {
+    var sel = $("adNoticeNoAdsPlan");
+    var plan = sel && sel.value === "year" ? "year" : "week";
+    if (G.openVkPayNoAds) G.openVkPayNoAds(plan);
+  });
   if (adNoticeModal) adNoticeModal.addEventListener("click", function (e) { if (e.target === adNoticeModal) G.closeAdNoticeModal(); });
 
   if (donateFabBtn) donateFabBtn.addEventListener("click", function () { G.openDonateModal(); });

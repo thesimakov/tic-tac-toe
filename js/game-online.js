@@ -38,23 +38,38 @@
 
   function roomIdFromCreatedPayload(data) {
     if (!data || typeof data !== "object") return "";
-    var r = data.roomId != null ? data.roomId : data.room_id;
-    return r != null && r !== "" ? String(r) : "";
+    var r =
+      data.roomId != null
+        ? data.roomId
+        : data.room_id != null
+          ? data.room_id
+          : data.room != null
+            ? data.room
+            : data.code != null
+              ? data.code
+              : data.id;
+    if (r == null || r === "") return "";
+    return String(r).trim();
   }
 
   function paintHostRoomCode() {
-    var code = G.hostRoomCode || "";
+    var code = String(G.hostRoomCode || "").trim();
+    G.hostRoomCode = code;
     var el = document.getElementById("roomCodeText");
     if (el) el.textContent = code;
   }
 
+  function syncRoomCodeRowVisibility() {
+    var row = document.getElementById("roomCodeRow");
+    if (!row) return;
+    var show = G.onlineRole === "host" && !!G.hostRoomCode && G.waitingForPeer;
+    row.hidden = !show;
+  }
+
   function syncOnlineChrome() {
     if (G.updateRobotDependentUI) G.updateRobotDependentUI();
-    if (G.onlineRole === "host" && G.hostRoomCode && G.waitingForPeer) {
-      var row = document.getElementById("roomCodeRow");
-      if (row) row.hidden = false;
-      paintHostRoomCode();
-    }
+    paintHostRoomCode();
+    syncRoomCodeRowVisibility();
   }
 
   function initRefs() {
@@ -110,7 +125,7 @@
       G.waitingForPeer = true; G.updateSideButtons(); G.refreshPlaySideLock();
       G.hostRoomCode = roomIdFromCreatedPayload(data);
       paintHostRoomCode();
-      if (roomCodeRow) roomCodeRow.hidden = !G.hostRoomCode;
+      syncRoomCodeRowVisibility();
       if (disconnectOnlineBtn) disconnectOnlineBtn.hidden = false;
       if (onlineStatusText) onlineStatusText.textContent = G.t("waitCode");
       G.resetGameLocal(); G.disableBoard(); G.updateStatus();
@@ -123,7 +138,7 @@
       G.humanSymbol = "O"; G.robotSymbol = "X";
       G.waitingForPeer = false; G.updateSideButtons(); G.refreshPlaySideLock();
       if (disconnectOnlineBtn) disconnectOnlineBtn.hidden = false;
-      if (roomCodeRow) roomCodeRow.hidden = true;
+      syncRoomCodeRowVisibility();
       if (onlineStatusText) onlineStatusText.textContent = G.t("inRoom");
       setSearchUI(false);
       syncOnlineChrome();
@@ -135,11 +150,11 @@
       G.humanSymbol = G.myOnlineSymbol; G.robotSymbol = G.myOnlineSymbol === "X" ? "O" : "X";
       G.waitingForPeer = false; G.updateSideButtons(); G.refreshPlaySideLock();
       if (G.onlineRole === "host" && data.roomId != null && data.roomId !== "") {
-        G.hostRoomCode = String(data.roomId);
+        G.hostRoomCode = String(data.roomId).trim();
         paintHostRoomCode();
       }
       if (disconnectOnlineBtn) disconnectOnlineBtn.hidden = false;
-      if (roomCodeRow) roomCodeRow.hidden = true;
+      syncRoomCodeRowVisibility();
       if (onlineStatusText) onlineStatusText.textContent = G.t("peerJoined");
       if (data.opponentName) G.showOpponent(data.opponentName, data.opponentAvatar);
       clearSearchTimeout();
@@ -149,6 +164,7 @@
     }
     if (data.type === "peerJoined") {
       G.waitingForPeer = false;
+      syncRoomCodeRowVisibility();
       if (onlineStatusText) onlineStatusText.textContent = G.t("peerJoined");
       if (data.opponentName) G.showOpponent(data.opponentName, data.opponentAvatar);
       G.updateStatus();
@@ -161,7 +177,7 @@
       G.hideOpponent();
       if (G.onlineRole === "host" && G.hostRoomCode) {
         paintHostRoomCode();
-        if (roomCodeRow) roomCodeRow.hidden = false;
+        syncRoomCodeRowVisibility();
       }
       syncOnlineChrome();
       return;
@@ -181,7 +197,7 @@
     var was = Boolean(G.onlineRole);
     G.hostRoomCode = "";
     G.onlineRole = null; G.myOnlineSymbol = null; G.waitingForPeer = false;
-    if (roomCodeRow) roomCodeRow.hidden = true;
+    syncRoomCodeRowVisibility();
     if (disconnectOnlineBtn) disconnectOnlineBtn.hidden = true;
     if (was && !G.robotEnabled && onlineStatusText) onlineStatusText.textContent = G.t("disconnected");
     G.humanSymbol = "X"; G.robotSymbol = "O";
@@ -194,7 +210,7 @@
     var prev = G.onlineWs;
     G.hostRoomCode = "";
     G.onlineRole = null; G.myOnlineSymbol = null; G.waitingForPeer = false;
-    if (roomCodeRow) roomCodeRow.hidden = true;
+    syncRoomCodeRowVisibility();
     if (disconnectOnlineBtn) disconnectOnlineBtn.hidden = true;
     if (onlineStatusText) onlineStatusText.textContent = G.t("connecting");
 
@@ -277,6 +293,9 @@
     if (G.showInterstitialAd) G.showInterstitialAd(function () { G.resetGameLocal(); });
     else G.resetGameLocal();
   };
+
+  G.paintHostRoomCode = paintHostRoomCode;
+  G.syncRoomCodeRowVisibility = syncRoomCodeRowVisibility;
 
   G.initOnline = function () {
     initRefs();

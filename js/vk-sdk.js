@@ -100,7 +100,6 @@
   function staticCatalog() {
     return [
       staticCatalogRow("disable_ads", "disableAds", "disableAdsDesc"),
-      staticCatalogRow("skin_neon", "skinNeon", "skinNeonDesc"),
       staticCatalogRow("skin_wood", "skinWood", "skinWoodDesc"),
       staticCatalogRow("skin_space", "skinSpace", "skinSpaceDesc")
     ];

@@ -909,7 +909,6 @@
     };
     var descs = {
       disable_ads: { name: t("disableAds"), desc: t("disableAdsDesc") },
-      skin_neon: { name: t("skinNeon"), desc: t("skinNeonDesc") },
       skin_wood: { name: t("skinWood"), desc: t("skinWoodDesc") },
       skin_space: { name: t("skinSpace"), desc: t("skinSpaceDesc") }
     };

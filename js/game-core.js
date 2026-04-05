@@ -343,7 +343,6 @@ window.Game = window.Game || {};
   /** Цены в монетах (1 монета = 1 голосу). Темы — аренда на сутки. */
   G.shopCoinPrices = {
     disable_ads: { coins: 14, perDay: false },
-    skin_neon: { coins: 5, perDay: true },
     skin_wood: { coins: 5, perDay: true },
     skin_space: { coins: 10, perDay: true }
   };

@@ -89,6 +89,19 @@
     return String(raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
   }
 
+  /** false / 0 / off / no в meta game-online-enabled — кнопка «Играть онлайн» неактивна. Нет meta или true — как раньше. */
+  G.isOnlineFeaturesEnabled = function () {
+    try {
+      var m = document.querySelector("meta[name=\"game-online-enabled\"]");
+      if (!m) return true;
+      var c = String(m.getAttribute("content") || "").trim().toLowerCase();
+      if (c === "false" || c === "0" || c === "no" || c === "off") return false;
+      return true;
+    } catch (e) {
+      return true;
+    }
+  };
+
   function getWsUrl() {
     var params = new URLSearchParams(window.location.search);
     var custom = params.get("ws");
@@ -299,6 +312,10 @@
 
   G.initOnline = function () {
     initRefs();
+
+    if (G.isOnlineFeaturesEnabled && !G.isOnlineFeaturesEnabled()) {
+      if (!G.robotEnabled && G.switchToRobotMode) G.switchToRobotMode();
+    }
 
     if (findMatchBtn) findMatchBtn.addEventListener("click", doFindMatch);
     if (inviteFriendBtn) inviteFriendBtn.addEventListener("click", doInviteFriend);

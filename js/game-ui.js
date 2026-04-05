@@ -387,6 +387,14 @@
     if (robotModeBtn) {
       robotModeBtn.textContent = robot ? G.t("switchToOnline") : G.t("switchToRobot");
       robotModeBtn.setAttribute("aria-pressed", robot ? "true" : "false");
+      var onlineAllowed = !G.isOnlineFeaturesEnabled || G.isOnlineFeaturesEnabled();
+      if (robot && !onlineAllowed) {
+        robotModeBtn.disabled = true;
+        robotModeBtn.setAttribute("title", G.t("onlineDisabledHint"));
+      } else {
+        robotModeBtn.disabled = false;
+        robotModeBtn.removeAttribute("title");
+      }
     }
   };
 
@@ -1081,6 +1089,8 @@
   }
   G.switchToRobotMode = switchToRobotMode;
   if (robotModeBtn) robotModeBtn.addEventListener("click", function () {
+    if (robotModeBtn.disabled) return;
+    if (G.robotEnabled && G.isOnlineFeaturesEnabled && !G.isOnlineFeaturesEnabled()) return;
     if (G.robotEnabled) switchToOnlineMode();
     else switchToRobotMode();
   });

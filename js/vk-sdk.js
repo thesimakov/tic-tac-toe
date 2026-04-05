@@ -18,30 +18,12 @@
     return bridgeRef;
   }
 
-  function vkAdsPanelEl() {
-    return document.getElementById("vkAdsPanel");
-  }
-
   function hideVkBannerAd() {
     var b = getBridge();
     if (!b) return;
     try {
       b.send("VKWebAppHideBannerAd", {}).catch(function () {});
     } catch (e1) {}
-  }
-
-  function syncVkAdsPanelVisibility() {
-    var el = vkAdsPanelEl();
-    if (!el) return;
-    if (!getBridge()) {
-      el.hidden = true;
-      return;
-    }
-    if (G.isAdsSuppressed && G.isAdsSuppressed()) {
-      el.hidden = true;
-      return;
-    }
-    el.hidden = false;
   }
 
   function tryShowVkBannerAd() {
@@ -118,13 +100,7 @@
     if (G.updateCoinsUI) G.updateCoinsUI();
     if (G.applyI18n) G.applyI18n();
     if (catalogCache && G.renderShopItems) G.renderShopItems(catalogCache);
-    if (getBridge()) {
-      if (G.isAdsSuppressed && G.isAdsSuppressed()) {
-        hideVkBannerAd();
-        var adsPanel = vkAdsPanelEl();
-        if (adsPanel) adsPanel.hidden = true;
-      } else syncVkAdsPanelVisibility();
-    }
+    if (getBridge() && G.isAdsSuppressed && G.isAdsSuppressed()) hideVkBannerAd();
   }
 
   function parseStorageJson(raw) {
@@ -359,7 +335,6 @@
           if (productId === "disable_ads") {
             G.showAds = false;
             hideVkBannerAd();
-            syncVkAdsPanelVisibility();
           } else if (String(productId).indexOf("skin_") === 0) {
             if (G.ownedSkins.indexOf(productId) === -1) G.ownedSkins.push(productId);
             if (G.applySkin) G.applySkin(productId);
@@ -513,7 +488,6 @@
           .then(function () {
             if (G.extendAdsFreePeriod) G.extendAdsFreePeriod(duration);
             hideVkBannerAd();
-            syncVkAdsPanelVisibility();
             if (G.closeAdNoticeModal) G.closeAdNoticeModal();
             if (G.resetGameLocal) G.resetGameLocal();
           })
@@ -621,7 +595,6 @@
         showVkSocialButtons();
         G.initUI();
         if (G.initOnline) G.initOnline();
-        syncVkAdsPanelVisibility();
         tryShowVkBannerAd();
       });
   };

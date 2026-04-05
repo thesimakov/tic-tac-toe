@@ -25,6 +25,7 @@
     userCoinsLabel = $("userCoinsLabel"), coinsValueEl = $("coinsValue"), userCoinsWrap = $("userCoinsWrap"),
     langRuBtn = $("langRuBtn"), langEnBtn = $("langEnBtn"),
     robotModeBtn = $("robotModeBtn"),
+    modeDifficultyRow = $("modeDifficultyRow"),
     donateModal = $("donateModal"), donateFabBtn = $("donateFabBtn"),
     donateModalCloseBtn = $("donateModalCloseBtn"), donateSubmitBtn = $("donateSubmitBtn");
 
@@ -253,6 +254,9 @@
     var onlineActive = G.isOnline();
     var robot = G.robotEnabled;
     difficultySuperWrap.hidden = onlineActive || !robot;
+    if (modeDifficultyRow) {
+      modeDifficultyRow.classList.toggle("mode-difficulty-row--online-only", onlineActive || !robot);
+    }
     if (hintBtn) hintBtn.hidden = onlineActive || !robot;
     var onlinePanel = $("onlinePanel");
     if (onlinePanel) onlinePanel.hidden = robot;

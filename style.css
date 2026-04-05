@@ -130,8 +130,8 @@ body.celebrating .bg-anim::before { animation-duration: 11s; }
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
-.app-header, .status, .play-side-wrap, .board-wrap, .controls { width: 100%; }
-.app-header, .status, .play-side-wrap, .stats-bar { flex-shrink: 0; }
+.app-header, .status, .play-side-wrap, .mode-difficulty-row, .board-wrap, .controls { width: 100%; }
+.app-header, .status, .play-side-wrap, .mode-difficulty-row, .stats-bar { flex-shrink: 0; }
 
 /* ---- user bar (soft toolbar: lang / coins / shop) ---- */
 .user-bar {
@@ -503,6 +503,47 @@ body.celebrating .bg-anim::before { animation-duration: 11s; }
 
 /* ---- difficulty ---- */
 .difficulty-super-wrap { flex: 0 1 auto; width: 100%; max-width: 300px; min-width: 0; margin: 0 auto; container-type: inline-size; container-name: difficulty-wrap; }
+.mode-difficulty-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+  min-width: 0;
+}
+.mode-difficulty-row .difficulty-super-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  width: auto;
+  margin: 0;
+}
+.mode-difficulty-row .mode-online-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  margin-top: 0;
+  width: auto;
+}
+.mode-difficulty-row .mode-online-wrap .btn {
+  width: auto;
+  max-width: none;
+  min-width: min(168px, 42vw);
+  white-space: nowrap;
+}
+.mode-difficulty-row--online-only .mode-online-wrap {
+  flex: 1 1 auto;
+  width: 100%;
+  justify-content: center;
+}
+.mode-difficulty-row--online-only .mode-online-wrap .btn {
+  width: 100%;
+  max-width: 320px;
+  min-width: 0;
+}
 .difficulty-dropdown { position: relative; width: 100%; }
 .difficulty-trigger {
   width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -555,10 +596,6 @@ body.celebrating .bg-anim::before { animation-duration: 11s; }
 .online-room-code strong { font-size: 1.15rem; letter-spacing: 0.18em; color: #1a4a8f; }
 .online-hint { margin: 8px 0 0; text-align: center; font-size: 0.8rem; color: var(--ink-soft); line-height: 1.35; min-height: 2.6em; }
 
-.mode-online-wrap {
-  width: 100%; display: flex; justify-content: center; margin-top: 10px;
-}
-.mode-online-wrap .btn { width: 100%; max-width: 320px; }
 .online-panel[hidden] { display: none !important; }
 .online-panel-head { margin-bottom: 4px; }
 .online-status { min-height: 1.5em; margin: 0 0 8px; text-align: center; font-size: 0.82rem; color: var(--ink-soft); line-height: 1.35; }

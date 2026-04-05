@@ -69,8 +69,27 @@
       </div>
     </div>
 
-    <div class="mode-online-wrap">
-      <button type="button" class="btn accent" id="robotModeBtn" aria-pressed="true"></button>
+    <div class="mode-difficulty-row" id="modeDifficultyRow">
+      <div class="difficulty-super-wrap" id="difficultySuperWrap">
+        <div class="difficulty-dropdown">
+          <button type="button" class="btn difficulty-trigger" id="difficultyTrigger"
+            aria-expanded="false" aria-haspopup="true" aria-controls="difficultyPopover">
+            <span class="difficulty-trigger-title" id="diffTriggerTitle">Уровень сложности</span>
+            <span class="difficulty-trigger-sub" id="difficultyCurrentLabel">Нормально</span>
+          </button>
+          <div class="difficulty-popover" id="difficultyPopover"
+            role="group" aria-label="Выбор уровня сложности робота" hidden>
+            <div class="difficulty-super-segments">
+              <button class="btn difficulty-super-btn" id="levelEasyBtn" type="button" aria-pressed="false">Легко</button>
+              <button class="btn difficulty-super-btn active accent" id="levelNormalBtn" type="button" aria-pressed="true">Нормально</button>
+              <button class="btn difficulty-super-btn" id="levelHardBtn" type="button" aria-pressed="false">Сложно</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mode-online-wrap">
+        <button type="button" class="btn accent" id="robotModeBtn" aria-pressed="true"></button>
+      </div>
     </div>
 
     <section class="online-panel" id="onlinePanel" aria-labelledby="onlineSectionTitle" hidden>
@@ -118,23 +137,6 @@
         <button class="btn" id="resetBtn" type="button">Сброс игры</button>
         <button class="btn" id="newGameBtn" type="button">Новая игра</button>
         <button class="btn" id="hintBtn" type="button">Подсказка</button>
-      </div>
-      <div class="difficulty-super-wrap" id="difficultySuperWrap">
-        <div class="difficulty-dropdown">
-          <button type="button" class="btn difficulty-trigger" id="difficultyTrigger"
-            aria-expanded="false" aria-haspopup="true" aria-controls="difficultyPopover">
-            <span class="difficulty-trigger-title" id="diffTriggerTitle">Уровень сложности</span>
-            <span class="difficulty-trigger-sub" id="difficultyCurrentLabel">Нормально</span>
-          </button>
-          <div class="difficulty-popover" id="difficultyPopover"
-            role="group" aria-label="Выбор уровня сложности робота" hidden>
-            <div class="difficulty-super-segments">
-              <button class="btn difficulty-super-btn" id="levelEasyBtn" type="button" aria-pressed="false">Легко</button>
-              <button class="btn difficulty-super-btn active accent" id="levelNormalBtn" type="button" aria-pressed="true">Нормально</button>
-              <button class="btn difficulty-super-btn" id="levelHardBtn" type="button" aria-pressed="false">Сложно</button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </main>

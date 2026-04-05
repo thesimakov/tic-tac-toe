@@ -287,7 +287,7 @@
 
   function afterAdNoticeConfirmed() {
     G.closeAdNoticeModal();
-    var reward = G.COINS_PER_NEW_GAME_AD || 10;
+    var reward = G.COINS_PER_NEW_GAME_AD || 1;
     function grantAdCoins() {
       G.coins = Math.max(0, Math.floor(G.coins || 0) + reward);
       G.updateCoinsUI();

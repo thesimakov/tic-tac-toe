@@ -69,7 +69,7 @@ window.Game = window.Game || {};
       lbRefresh: "Обновить",
       score: "Очки",
       adNoticeTitle: "Реклама",
-      adNoticeBody: "Сейчас будет небольшая реклама, мы дарим Вам за это 10 монет, на эти монеты скоро можно купить скины.",
+      adNoticeBody: "Сейчас будет небольшая реклама, мы дарим Вам за это 1 монету, на эти монеты скоро можно купить скины.",
       adNoticeOk: "Хорошо",
       adNoAdsOffer: "Отключить рекламу",
       adPayPlanAria: "Период без рекламы",
@@ -177,7 +177,7 @@ window.Game = window.Game || {};
       lbRefresh: "Refresh",
       score: "Score",
       adNoticeTitle: "Ad",
-      adNoticeBody: "A short ad will play now. We’ll give you 10 coins for watching — you’ll soon be able to spend them on skins.",
+      adNoticeBody: "A short ad will play now. We’ll give you 1 coin for watching — you’ll soon be able to spend it on skins.",
       adNoticeOk: "OK",
       adNoAdsOffer: "Remove ads",
       adPayPlanAria: "Ad-free period",
@@ -336,7 +336,7 @@ window.Game = window.Game || {};
   G.lastAdTime = 0;
   G.stats = { wins: 0, losses: 0, draws: 0 };
   G.coins = 0;
-  G.COINS_PER_NEW_GAME_AD = 10;
+  G.COINS_PER_NEW_GAME_AD = 1;
 
   var SHOP_DAY_MS = 86400000;
 

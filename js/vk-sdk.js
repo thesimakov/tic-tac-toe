@@ -18,6 +18,61 @@
     return bridgeRef;
   }
 
+  function vkAdsPanelEl() {
+    return document.getElementById("vkAdsPanel");
+  }
+
+  function hideVkBannerAd() {
+    var b = getBridge();
+    if (!b) return;
+    try {
+      b.send("VKWebAppHideBannerAd", {}).catch(function () {});
+    } catch (e1) {}
+  }
+
+  function syncVkAdsPanelVisibility() {
+    var el = vkAdsPanelEl();
+    if (!el) return;
+    if (!getBridge()) {
+      el.hidden = true;
+      return;
+    }
+    if (G.isAdsSuppressed && G.isAdsSuppressed()) {
+      el.hidden = true;
+      return;
+    }
+    el.hidden = false;
+  }
+
+  function tryShowVkBannerAd() {
+    if (G.isAdsSuppressed && G.isAdsSuppressed()) return;
+    var b = getBridge();
+    if (!b) return;
+    var run = function () {
+      b.send("VKWebAppCheckBannerAd", {})
+        .then(function (check) {
+          var ok = Boolean(
+            check &&
+              (check.result === true || check.result === "true" || check.success === true)
+          );
+          if (!ok) return null;
+          return b.send("VKWebAppShowBannerAd", {
+            banner_location: "bottom",
+            banner_align: "right",
+            layout_type: "overlay",
+            orientation: "vertical",
+            height_type: "regular"
+          });
+        })
+        .catch(function () {});
+    };
+    if (typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(run);
+    } else {
+      setTimeout(run, 0);
+    }
+  }
+
   function wrapPlayer(user) {
     var first = (user && user.first_name) || "";
     var last = (user && user.last_name) || "";
@@ -64,6 +119,13 @@
     if (G.updateCoinsUI) G.updateCoinsUI();
     if (G.applyI18n) G.applyI18n();
     if (catalogCache && G.renderShopItems) G.renderShopItems(catalogCache);
+    if (getBridge()) {
+      if (G.isAdsSuppressed && G.isAdsSuppressed()) {
+        hideVkBannerAd();
+        var adsPanel = vkAdsPanelEl();
+        if (adsPanel) adsPanel.hidden = true;
+      } else syncVkAdsPanelVisibility();
+    }
   }
 
   function parseStorageJson(raw) {
@@ -295,8 +357,11 @@
         .then(function (res) {
           var ok = res && (res.success === true || res.status === "success");
           if (!ok) return;
-          if (productId === "disable_ads") G.showAds = false;
-          else if (String(productId).indexOf("skin_") === 0) {
+          if (productId === "disable_ads") {
+            G.showAds = false;
+            hideVkBannerAd();
+            syncVkAdsPanelVisibility();
+          } else if (String(productId).indexOf("skin_") === 0) {
             if (G.ownedSkins.indexOf(productId) === -1) G.ownedSkins.push(productId);
             if (G.applySkin) G.applySkin(productId);
           }
@@ -448,6 +513,8 @@
         b.send("VKWebAppOpenPayForm", payload)
           .then(function () {
             if (G.extendAdsFreePeriod) G.extendAdsFreePeriod(duration);
+            hideVkBannerAd();
+            syncVkAdsPanelVisibility();
             if (G.closeAdNoticeModal) G.closeAdNoticeModal();
             if (G.resetGameLocal) G.resetGameLocal();
           })
@@ -555,6 +622,8 @@
         showVkSocialButtons();
         G.initUI();
         if (G.initOnline) G.initOnline();
+        syncVkAdsPanelVisibility();
+        tryShowVkBannerAd();
       });
   };
 })(window.Game);

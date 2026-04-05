@@ -10,11 +10,35 @@
   <!-- Суммы в голосах для VKWebAppOpenPayForm («отключить рекламу» в модалке перед рекламой). Подстройте под курс и кабинет ВК. -->
   <meta name="vk-ads-week-votes" content="100">
   <meta name="vk-ads-year-votes" content="1500">
+  <!-- WebSocket для онлайна (необязательно). Пустой content = берётся адрес из js/game-online.js. Пример: content="wss://ваш-сервис.onrender.com" -->
+  <meta name="game-ws-url" content="">
   <title>Крестики-нолики</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="bg-anim" aria-hidden="true"></div>
+
+  <div class="welcome-overlay" id="welcomeOverlay" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" hidden>
+    <div class="welcome-blobs" aria-hidden="true">
+      <span class="welcome-blob welcome-blob--a"></span>
+      <span class="welcome-blob welcome-blob--b"></span>
+      <span class="welcome-blob welcome-blob--c"></span>
+    </div>
+    <div class="welcome-float welcome-float--1" aria-hidden="true">×</div>
+    <div class="welcome-float welcome-float--2" aria-hidden="true">○</div>
+    <div class="welcome-float welcome-float--3" aria-hidden="true">★</div>
+    <div class="welcome-card">
+      <div class="welcome-mini-board" aria-hidden="true">
+        <span class="welcome-tile">×</span><span class="welcome-tile welcome-tile--o">○</span><span class="welcome-tile">×</span>
+        <span class="welcome-tile welcome-tile--o">○</span><span class="welcome-tile">×</span><span class="welcome-tile">○</span>
+        <span class="welcome-tile">×</span><span class="welcome-tile welcome-tile--o">○</span><span class="welcome-tile">×</span>
+      </div>
+      <h1 class="welcome-title" id="welcomeTitle">Крестики-нолики</h1>
+      <p class="welcome-sub" id="welcomeSub">Сыграй с роботом или с другом онлайн!</p>
+      <button type="button" class="btn welcome-enter-btn accent" id="welcomeEnterBtn">Войти</button>
+    </div>
+  </div>
+
   <div class="page-layout">
   <div class="lb-drawer-backdrop" id="lbDrawerBackdrop" hidden aria-hidden="true"></div>
   <aside class="leaderboard-panel" id="leaderboardPanel" aria-labelledby="lbTitle">
@@ -95,34 +119,6 @@
       </div>
     </div>
 
-    <section class="online-panel" id="onlinePanel" aria-labelledby="onlineSectionTitle" hidden>
-      <div class="online-panel-head">
-        <span class="online-panel-title" id="onlineSectionTitle"></span>
-      </div>
-      <p class="online-status" id="onlineStatusText" aria-live="polite"></p>
-      <div class="online-actions">
-        <button type="button" class="btn" id="findMatchBtn"></button>
-        <button type="button" class="btn" id="inviteFriendBtn"></button>
-        <button type="button" class="btn" id="cancelSearchBtn" hidden></button>
-      </div>
-      <div class="online-join-row">
-        <input type="text" class="online-code-input" id="joinCodeInput" maxlength="8" autocomplete="off" inputmode="text" spellcheck="false" aria-label="" />
-        <button type="button" class="btn" id="joinRoomBtn"></button>
-      </div>
-      <div class="online-room-row" id="roomCodeRow" hidden>
-        <span class="room-code-label" id="roomCodeLabel"></span>
-        <code class="room-code-value" id="roomCodeText"></code>
-        <button type="button" class="btn btn-tiny" id="copyCodeBtn"></button>
-        <button type="button" class="btn btn-tiny" id="shareVkBtn" hidden></button>
-        <button type="button" class="btn btn-tiny" id="inviteVkBtn" hidden></button>
-      </div>
-      <button type="button" class="btn btn-tiny online-disconnect" id="disconnectOnlineBtn" hidden></button>
-      <div class="opponent-row" id="opponentRow" hidden>
-        <img class="opponent-avatar" id="opponentAvatarImg" alt="" width="32" height="32" decoding="async" />
-        <span class="opponent-name" id="opponentNameText"></span>
-      </div>
-    </section>
-
     <div class="board-wrap">
       <section class="board" id="board" aria-label="Игровое поле 3 на 3"></section>
     </div>
@@ -143,6 +139,46 @@
       </div>
     </div>
   </main>
+  </div>
+
+  <div class="online-modal-overlay" id="onlinePanel" hidden aria-hidden="true">
+    <div class="online-modal-card" role="dialog" aria-modal="true" aria-labelledby="onlineSectionTitle">
+      <button type="button" class="shop-dismiss online-panel-dismiss" id="onlinePanelCloseBtn" aria-label="">
+        <span class="shop-dismiss-icon" aria-hidden="true"></span>
+      </button>
+      <div class="online-panel-body">
+        <div class="online-panel-head">
+          <span class="online-panel-title" id="onlineSectionTitle"></span>
+        </div>
+        <p class="online-status" id="onlineStatusText" aria-live="polite"></p>
+        <p class="online-server-hint" id="onlineServerHint" hidden></p>
+        <div class="online-actions">
+          <button type="button" class="btn" id="findMatchBtn"></button>
+          <button type="button" class="btn" id="inviteFriendBtn"></button>
+          <button type="button" class="btn online-actions-full" id="cancelSearchBtn" hidden></button>
+        </div>
+        <div class="online-join-row">
+          <input type="text" class="online-code-input" id="joinCodeInput" maxlength="8" autocomplete="off" inputmode="text" spellcheck="false" aria-label="" />
+          <button type="button" class="btn" id="joinRoomBtn"></button>
+        </div>
+        <div class="online-room-row" id="roomCodeRow" hidden>
+          <div class="online-room-code-block">
+            <span class="room-code-label" id="roomCodeLabel"></span>
+            <code class="room-code-value" id="roomCodeText"></code>
+          </div>
+          <div class="online-room-actions">
+            <button type="button" class="btn btn-tiny" id="copyCodeBtn"></button>
+            <button type="button" class="btn btn-tiny" id="shareVkBtn" hidden></button>
+            <button type="button" class="btn btn-tiny" id="inviteVkBtn" hidden></button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-tiny online-disconnect" id="disconnectOnlineBtn" hidden></button>
+        <div class="opponent-row" id="opponentRow" hidden>
+          <img class="opponent-avatar" id="opponentAvatarImg" alt="" width="32" height="32" decoding="async" />
+          <span class="opponent-name" id="opponentNameText"></span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="modal ad-notice-modal" id="adNoticeModal" role="dialog" aria-modal="true" aria-labelledby="adNoticeTitle">

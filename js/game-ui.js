@@ -68,6 +68,15 @@
     boardSizeOptionsEl.appendChild(opt);
   }
 
+  var WELCOME_SESSION_KEY = "zeroplus_welcome_enter";
+
+  G.syncWelcomeI18n = function () {
+    var t = G.t.bind(G);
+    if ($("welcomeTitle")) $("welcomeTitle").textContent = t("welcomeTitle");
+    if ($("welcomeSub")) $("welcomeSub").textContent = t("welcomeSub");
+    if ($("welcomeEnterBtn")) $("welcomeEnterBtn").textContent = t("welcomeEnter");
+  };
+
   /* ---- i18n UI update ---- */
   G.applyI18n = function () {
     var t = G.t.bind(G);
@@ -136,6 +145,10 @@
       langSelect.setAttribute("aria-label", t("langGroupAria"));
     }
     if ($("onlineSectionTitle")) $("onlineSectionTitle").textContent = t("onlineTitle");
+    if ($("onlinePanelCloseBtn")) {
+      $("onlinePanelCloseBtn").setAttribute("aria-label", t("onlinePanelCloseAria"));
+      $("onlinePanelCloseBtn").setAttribute("title", t("onlinePanelCloseAria"));
+    }
     if ($("findMatchBtn")) $("findMatchBtn").textContent = t("findMatch");
     if ($("inviteFriendBtn")) $("inviteFriendBtn").textContent = t("inviteFriend");
     if ($("cancelSearchBtn")) $("cancelSearchBtn").textContent = t("cancel");
@@ -147,6 +160,8 @@
       $("joinCodeInput").setAttribute("placeholder", t("roomCode"));
     }
     if ($("disconnectOnlineBtn")) $("disconnectOnlineBtn").textContent = t("disconnect");
+    var osh = $("onlineServerHint");
+    if (osh && !osh.hidden) osh.textContent = t("noServerHint");
     if ($("shareVkBtn")) $("shareVkBtn").textContent = t("shareRoomVk");
     if ($("inviteVkBtn")) $("inviteVkBtn").textContent = t("inviteVkFriends");
     if (donateFabBtn) {
@@ -181,6 +196,7 @@
       userAvatarBtn.setAttribute("aria-label", t("profileAvatarBtnAria"));
       userAvatarBtn.setAttribute("title", t("profileAvatarBtnAria"));
     }
+    G.syncWelcomeI18n();
     G.applyBoardLayout();
     G.updateDifficultyCurrentLabel();
     G.updateStatsUI();
@@ -353,7 +369,10 @@
     }
     if (hintBtn) hintBtn.hidden = onlineActive || !robot;
     var onlinePanel = $("onlinePanel");
-    if (onlinePanel) onlinePanel.hidden = robot;
+    if (onlinePanel) {
+      onlinePanel.hidden = robot;
+      onlinePanel.setAttribute("aria-hidden", robot ? "true" : "false");
+    }
     if (robotModeBtn) {
       robotModeBtn.textContent = robot ? G.t("switchToOnline") : G.t("switchToRobot");
       robotModeBtn.setAttribute("aria-pressed", robot ? "true" : "false");
@@ -970,6 +989,12 @@
   resultModal.addEventListener("click", function (e) { if (e.target === resultModal) G.closeModal(); });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
+      var op = $("onlinePanel");
+      if (!G.robotEnabled && op && !op.hidden) {
+        switchToRobotMode();
+        e.preventDefault();
+        return;
+      }
       closeDiff(); closeBoardSize(); G.closeModal(); G.closeShop(); G.closeAdNoticeModal(); G.closeLeaderboard(); G.closeDonateModal(); G.closeProfileModal();
     }
   });
@@ -1028,15 +1053,14 @@
   if (shopCloseBtn) shopCloseBtn.addEventListener("click", function () { G.closeShop(); });
   if (shopOverlay) shopOverlay.addEventListener("click", function (e) { if (e.target === shopOverlay) G.closeShop(); });
 
-  if (robotModeBtn) robotModeBtn.addEventListener("click", function () {
-    if (G.robotEnabled) {
-      G.disconnectOnlineSession();
-      G.robotEnabled = false;
-      G.resetGameLocal();
-      G.updateRobotDependentUI();
-      G.refreshPlaySideLock();
-      return;
-    }
+  function switchToOnlineMode() {
+    G.disconnectOnlineSession();
+    G.robotEnabled = false;
+    G.resetGameLocal();
+    G.updateRobotDependentUI();
+    G.refreshPlaySideLock();
+  }
+  function switchToRobotMode() {
     G.disconnectOnlineSession();
     G.robotEnabled = true;
     G.waitingForPeer = false;
@@ -1044,7 +1068,18 @@
     G.resetGameLocal();
     G.updateRobotDependentUI();
     G.refreshPlaySideLock();
+  }
+  if (robotModeBtn) robotModeBtn.addEventListener("click", function () {
+    if (G.robotEnabled) switchToOnlineMode();
+    else switchToRobotMode();
   });
+  if ($("onlinePanelCloseBtn")) $("onlinePanelCloseBtn").addEventListener("click", switchToRobotMode);
+  var onlinePanelEl = $("onlinePanel");
+  if (onlinePanelEl) {
+    onlinePanelEl.addEventListener("click", function (e) {
+      if (e.target === onlinePanelEl) switchToRobotMode();
+    });
+  }
 
   /* ---- contextmenu / longtap prevention (Yandex Games 1.6.1.8 & 1.6.2.7) ---- */
   document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
@@ -1058,4 +1093,45 @@
     G.closeDonateModal();
     G.closeProfileModal();
   };
+
+  function initWelcomeOverlay() {
+    var overlay = $("welcomeOverlay");
+    var btn = $("welcomeEnterBtn");
+    if (!overlay || !btn) return;
+    G.syncWelcomeI18n();
+    if (sessionStorage.getItem(WELCOME_SESSION_KEY)) {
+      overlay.hidden = true;
+      return;
+    }
+    overlay.hidden = false;
+    document.documentElement.classList.add("welcome-active");
+    document.body.classList.add("welcome-active");
+    function dismissWelcome() {
+      if (overlay.hidden) return;
+      sessionStorage.setItem(WELCOME_SESSION_KEY, "1");
+      overlay.classList.add("welcome-overlay--leaving");
+      document.documentElement.classList.remove("welcome-active");
+      document.body.classList.remove("welcome-active");
+      window.setTimeout(function () {
+        overlay.hidden = true;
+        overlay.classList.remove("welcome-overlay--leaving");
+      }, 400);
+    }
+    btn.addEventListener("click", dismissWelcome);
+    document.addEventListener(
+      "keydown",
+      function welcomeOverlayEsc(e) {
+        if (e.key !== "Escape" || overlay.hidden) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        dismissWelcome();
+      },
+      true
+    );
+    try {
+      btn.focus();
+    } catch (e0) {}
+  }
+
+  initWelcomeOverlay();
 })(window.Game);

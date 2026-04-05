@@ -8,6 +8,9 @@ window.Game = window.Game || {};
   G.texts = {
     ru: {
       title: "Крестики-нолики",
+      welcomeTitle: "Крестики-нолики",
+      welcomeSub: "Сыграй с роботом или с другом онлайн — жми «Войти» и поехали!",
+      welcomeEnter: "Войти",
       playAsX: "Играть за X", playAsO: "Играть за O",
       fieldSize: "Размер поля",
       reset: "Сброс игры", newGame: "Новая игра",
@@ -32,6 +35,10 @@ window.Game = window.Game || {};
       copied: "Скопировано в буфер обмена.",
       connecting: "Подключение…",
       noServer: "Нет связи с сервером.",
+      noServerHint:
+        "Локально: в папке server выполните npm install и node server.js, откройте игру по адресу http://localhost:8080/. " +
+        "Для своего хоста укажите wss в <meta name=\"game-ws-url\"> в index.html или константу GAME_SERVER_URL в js/game-online.js; " +
+        "временно можно передать ?ws=wss://ваш-сервер в адресе страницы.",
       roomNotFound: "Комната не найдена или уже занята",
       peerJoined: "Соперник подключился!",
       peerLeft: "Соперник вышел. Ожидаем нового игрока.",
@@ -83,6 +90,7 @@ window.Game = window.Game || {};
       inviteVkFriends: "Пригласить в ВК",
       playVsRobot: "Против робота",
       playOnline: "Онлайн",
+      onlinePanelCloseAria: "Закрыть и играть с роботом",
       switchToOnline: "Играть онлайн",
       switchToRobot: "Играть с роботом",
       connectToPlay: "Найдите соперника или введите код комнаты.",
@@ -108,6 +116,9 @@ window.Game = window.Game || {};
     },
     en: {
       title: "Tic-Tac-Toe",
+      welcomeTitle: "Tic-Tac-Toe",
+      welcomeSub: "Play vs bot or a friend online — tap below and go!",
+      welcomeEnter: "Play",
       playAsX: "Play as X", playAsO: "Play as O",
       fieldSize: "Board size",
       reset: "Reset", newGame: "New game",
@@ -132,6 +143,10 @@ window.Game = window.Game || {};
       copied: "Copied to clipboard.",
       connecting: "Connecting…",
       noServer: "Cannot reach server.",
+      noServerHint:
+        "Local: cd server && npm install && node server.js, then open http://localhost:8080/. " +
+        "For production set wss in <meta name=\"game-ws-url\"> in index.html or GAME_SERVER_URL in js/game-online.js; " +
+        "you can override with ?ws=wss://your-host in the page URL.",
       roomNotFound: "Room not found or full",
       peerJoined: "Opponent joined!",
       peerLeft: "Opponent left. Waiting for a new player.",
@@ -183,6 +198,7 @@ window.Game = window.Game || {};
       inviteVkFriends: "Invite VK friends",
       playVsRobot: "Vs bot",
       playOnline: "Online",
+      onlinePanelCloseAria: "Close and play vs bot",
       switchToOnline: "Play online",
       switchToRobot: "Play vs bot",
       connectToPlay: "Find an opponent or enter a room code.",

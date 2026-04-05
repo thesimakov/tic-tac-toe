@@ -6,6 +6,9 @@
 
   G.texts.kk = {
     title: "Тик-так-то",
+    welcomeTitle: "Тик-так-то",
+    welcomeSub: "Роботпен немесе онлайн доспен ойна — «Кіру» деп баста!",
+    welcomeEnter: "Кіру",
     playAsX: "X үшін ойнау", playAsO: "O үшін ойнау",
     fieldSize: "Өріс өлшемі",
     reset: "Ойынды тастау", newGame: "Жаңа ойын",
@@ -30,6 +33,9 @@
     copied: "Алмасу буферіне көшірілді.",
     connecting: "Қосылу…",
     noServer: "Серверге қосылу мүмкін емес.",
+    noServerHint:
+      "Жергілікті: server қалтасында npm install және node server.js, ойынды http://localhost:8080/ арқылы ашыңыз. " +
+      "meta game-ws-url немесе js/game-online.js ішіндегі GAME_SERVER_URL арқылы wss көрсетіңіз; ?ws=wss://… сілтемеде қолдануға болады.",
     roomNotFound: "Бөлме табылмады немесе толы",
     peerJoined: "Қарсылас қосылды!",
     peerLeft: "Қарсылас шықты. Жаңа ойыншыны күтеміз.",
@@ -81,6 +87,7 @@
     inviteVkFriends: "VK достарын шақыру",
     playVsRobot: "Роботқа қарсы",
     playOnline: "Онлайн",
+    onlinePanelCloseAria: "Жабу және роботпен ойнау",
     switchToOnline: "Онлайн ойнау",
     switchToRobot: "Роботпен ойнау",
     connectToPlay: "Қарсылас табыңыз немесе бөлме кодын енгізіңіз.",
@@ -107,6 +114,9 @@
 
   G.texts.uz = {
     title: "Tic-Tac-Toe",
+    welcomeTitle: "Tic-Tac-Toe",
+    welcomeSub: "Robot yoki do‘st bilan onlayn o‘yna — «Kirish» tugmasini bosing!",
+    welcomeEnter: "Kirish",
     playAsX: "X bilan o‘ynash", playAsO: "O bilan o‘ynash",
     fieldSize: "Maydon o‘lchami",
     reset: "O‘yinni tashlash", newGame: "Yangi o‘yin",
@@ -131,6 +141,9 @@
     copied: "Buferga nusxalandi.",
     connecting: "Ulanmoqda…",
     noServer: "Serverga ulanib bo‘lmadi.",
+    noServerHint:
+      "Lokal: server papkasida npm install va node server.js, o‘yinni http://localhost:8080/ orqali oching. " +
+      "meta game-ws-url yoki js/game-online.js dagi GAME_SERVER_URL orqali wss ko‘rsating; ?ws=wss://… ishlatish mumkin.",
     roomNotFound: "Xona topilmadi yoki to‘la",
     peerJoined: "Raqib qo‘shildi!",
     peerLeft: "Raqib chiqdi. Yangi o‘yinchi kutilmoqda.",
@@ -182,6 +195,7 @@
     inviteVkFriends: "VK do‘stlarini taklif",
     playVsRobot: "Robotga qarshi",
     playOnline: "Onlayn",
+    onlinePanelCloseAria: "Yopish va robot bilan o‘ynash",
     switchToOnline: "Onlayn o‘ynash",
     switchToRobot: "Robot bilan o‘ynash",
     connectToPlay: "Raqib toping yoki xona kodini kiriting.",
@@ -208,6 +222,9 @@
 
   G.texts.tg = {
     title: "Тик-так-то",
+    welcomeTitle: "Тик-так-то",
+    welcomeSub: "Бо робот ё онлайн бо дӯст бозӣ кун — «Даромадан»-ро пахш кун!",
+    welcomeEnter: "Даромадан",
     playAsX: "Бозӣ барои X", playAsO: "Бозӣ барои O",
     fieldSize: "Андозаи майдон",
     reset: "Бозиро партофтан", newGame: "Бозии нав",
@@ -232,6 +249,9 @@
     copied: "Ба буфер нусха шуд.",
     connecting: "Пайвастшавӣ…",
     noServer: "Ба сервер пайваст нашуд.",
+    noServerHint:
+      "Маҳаллӣ: дар папкаи server npm install ва node server.js, бозиро аз http://localhost:8080/ кушоед. " +
+      "wss-ро дар meta game-ws-url ё GAME_SERVER_URL дар js/game-online.js нишон диҳед; ?ws=wss://… истифода баред.",
     roomNotFound: "Утоқ ёфт нашуд ё пур аст",
     peerJoined: "Ҳариф пайваст шуд!",
     peerLeft: "Ҳариф баромад. Интизори бозигари нав.",
@@ -283,6 +303,7 @@
     inviteVkFriends: "Дӯстони VK-ро даъват",
     playVsRobot: "Алайҳи робот",
     playOnline: "Онлайн",
+    onlinePanelCloseAria: "Пӯшидан ва бо робот бозӣ",
     switchToOnline: "Онлайн бозӣ кардан",
     switchToRobot: "Бо робот бозӣ кардан",
     connectToPlay: "Ҳариф ёбед ё рамзи уторо ворид кунед.",

@@ -36,6 +36,10 @@
 
   function $(id) { return document.getElementById(id); }
 
+  function syncOnlineChrome() {
+    if (G.updateRobotDependentUI) G.updateRobotDependentUI();
+  }
+
   function initRefs() {
     onlineStatusText = $("onlineStatusText");
     findMatchBtn = $("findMatchBtn");
@@ -100,6 +104,7 @@
       if (onlineStatusText) onlineStatusText.textContent = G.t("waitCode");
       G.resetGameLocal(); G.disableBoard(); G.updateStatus();
       setSearchUI(false);
+      syncOnlineChrome();
       return;
     }
     if (data.type === "joined") {
@@ -110,6 +115,7 @@
       if (roomCodeRow) roomCodeRow.hidden = true;
       if (onlineStatusText) onlineStatusText.textContent = G.t("inRoom");
       setSearchUI(false);
+      syncOnlineChrome();
       return;
     }
     if (data.type === "matched") {
@@ -123,6 +129,7 @@
       if (data.opponentName) G.showOpponent(data.opponentName, data.opponentAvatar);
       clearSearchTimeout();
       setSearchUI(false);
+      syncOnlineChrome();
       return;
     }
     if (data.type === "peerJoined") {
@@ -130,12 +137,14 @@
       if (onlineStatusText) onlineStatusText.textContent = G.t("peerJoined");
       if (data.opponentName) G.showOpponent(data.opponentName, data.opponentAvatar);
       G.updateStatus();
+      syncOnlineChrome();
       return;
     }
     if (data.type === "guestLeft") {
       G.waitingForPeer = true;
       if (onlineStatusText) onlineStatusText.textContent = G.t("peerLeft");
       G.hideOpponent();
+      syncOnlineChrome();
       return;
     }
     if (data.type === "hostLeft") {
@@ -159,6 +168,7 @@
     G.humanSymbol = "X"; G.robotSymbol = "O";
     G.updateSideButtons(); G.refreshPlaySideLock(); G.resetGameLocal();
     G.hideOpponent(); setSearchUI(false);
+    syncOnlineChrome();
   }
 
   function connectWebSocket(afterOpen) {
@@ -239,6 +249,7 @@
     setSearchUI(false);
     setOnlineServerHint(false);
     if (onlineStatusText) onlineStatusText.textContent = "";
+    syncOnlineChrome();
   }
 
   G.onNewGame = function () {
@@ -293,7 +304,7 @@
     });
 
     if (disconnectOnlineBtn) disconnectOnlineBtn.addEventListener("click", function () {
-      G.disconnectOnlineSession();
+      if (G.switchToRobotMode) G.switchToRobotMode();
     });
 
     var joinParam = new URLSearchParams(window.location.search).get("join");

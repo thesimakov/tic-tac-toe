@@ -131,7 +131,7 @@
     }
     if (langSelect) {
       if (!langSelect.options.length) {
-        var order = ["ru", "en", "kk", "uz", "tg"];
+        var order = ["ru", "en", "kk", "uz", "tg", "ky"];
         for (var li = 0; li < order.length; li++) {
           var lc = order[li];
           if (!G.isLangSupported || !G.isLangSupported(lc)) continue;
@@ -370,8 +370,19 @@
     if (hintBtn) hintBtn.hidden = onlineActive || !robot;
     var onlinePanel = $("onlinePanel");
     if (onlinePanel) {
-      onlinePanel.hidden = robot;
-      onlinePanel.setAttribute("aria-hidden", robot ? "true" : "false");
+      /* Модалка лобби: только пока онлайн-режим без активной партии с соперником */
+      var showLobbyModal = !robot && (!G.isOnline() || G.waitingForPeer);
+      var wasLobbyOpen = !onlinePanel.hidden;
+      onlinePanel.hidden = !showLobbyModal;
+      onlinePanel.setAttribute("aria-hidden", showLobbyModal ? "false" : "true");
+      if (wasLobbyOpen && !showLobbyModal) {
+        var bw = document.querySelector(".board-wrap");
+        if (bw && typeof bw.scrollIntoView === "function") {
+          requestAnimationFrame(function () {
+            bw.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        }
+      }
     }
     if (robotModeBtn) {
       robotModeBtn.textContent = robot ? G.t("switchToOnline") : G.t("switchToRobot");
@@ -1069,6 +1080,7 @@
     G.updateRobotDependentUI();
     G.refreshPlaySideLock();
   }
+  G.switchToRobotMode = switchToRobotMode;
   if (robotModeBtn) robotModeBtn.addEventListener("click", function () {
     if (G.robotEnabled) switchToOnlineMode();
     else switchToRobotMode();

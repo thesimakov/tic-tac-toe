@@ -257,6 +257,7 @@ window.Game = window.Game || {};
         if (reg === "KZ" && G.isLangSupported("kk")) return "kk";
         if (reg === "UZ" && G.isLangSupported("uz")) return "uz";
         if (reg === "TJ" && G.isLangSupported("tg")) return "tg";
+        if (reg === "KG" && G.isLangSupported("ky")) return "ky";
         if (reg === "RU" && G.isLangSupported("ru")) return "ru";
         if ((reg === "US" || reg === "GB" || reg === "AU") && G.isLangSupported("en")) return "en";
       }

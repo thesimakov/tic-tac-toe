@@ -53,7 +53,6 @@ window.Game = window.Game || {};
       wow: ["Вау!","Круто!","Супер!","Класс!","Ура!","Ого!","Кайф!","Найс!","Так держать!","Огонь!","Бум!","Есть!","Шик!","Мощно!","Зачёт!"],
       celeb: ["НЕВЕРОЯТНО!","ВАУ!","ПОТРЯСАЮЩЕ!","СУПЕР!"],
       bannerWin: "Ура! Ты выиграл!",
-      howToPlay: "Нажимайте на клетки, чтобы ставить фигуры. Выстройте ряд своих фигур — по горизонтали, вертикали или диагонали.",
       timeout: "Соперник не найден. Сыграть с роботом?",
       timeoutYes: "Да, с роботом", timeoutNo: "Искать дальше",
       leaderboard: "Рейтинг", lbToggleAria: "Открыть или закрыть рейтинг",
@@ -65,6 +64,11 @@ window.Game = window.Game || {};
       adNoticeTitle: "Реклама",
       adNoticeBody: "Сейчас будет небольшая реклама, мы дарим Вам за это 10 монет, на эти монеты скоро можно купить скины.",
       adNoticeOk: "Хорошо",
+      adNoAdsOffer: "Отключить рекламу",
+      adPayWeekBtn: "100 ₽ голосами · неделя",
+      adPayYearBtn: "1500 ₽ голосами · год",
+      adPayWeekDesc: "Отключение рекламы на 7 дней",
+      adPayYearDesc: "Отключение рекламы на 1 год",
       coins: "Монеты",
       langGroupAria: "Язык интерфейса",
       playSideAria: "Сторона и размер поля",
@@ -136,7 +140,6 @@ window.Game = window.Game || {};
       wow: ["Wow!","Cool!","Super!","Nice!","Yay!","Great!","Boom!","Yes!","Awesome!","Nice one!","Sweet!","Nailed it!","Crushed it!","Epic!","Love it!"],
       celeb: ["INCREDIBLE!","WOW!","AMAZING!","SUPER!"],
       bannerWin: "You won!",
-      howToPlay: "Tap cells to place marks. Line up your marks in a row — horizontally, vertically, or diagonally.",
       timeout: "No opponent found. Play with bot?",
       timeoutYes: "Yes, bot", timeoutNo: "Keep searching",
       leaderboard: "Leaderboard", lbToggleAria: "Open or close leaderboard",
@@ -148,6 +151,11 @@ window.Game = window.Game || {};
       adNoticeTitle: "Ad",
       adNoticeBody: "A short ad will play now. We’ll give you 10 coins for watching — you’ll soon be able to spend them on skins.",
       adNoticeOk: "OK",
+      adNoAdsOffer: "Remove ads",
+      adPayWeekBtn: "100 ₽ in votes · 1 week",
+      adPayYearBtn: "1500 ₽ in votes · 1 year",
+      adPayWeekDesc: "No ads for 7 days",
+      adPayYearDesc: "No ads for 1 year",
       coins: "Coins",
       langGroupAria: "Interface language",
       playSideAria: "Side and board size",
@@ -222,6 +230,8 @@ window.Game = window.Game || {};
   G.player = null;
   G.payments = null;
   G.showAds = true;
+  /** Время (ms), до которого действует оплата «без рекламы» через VKWebAppOpenPayForm. */
+  G.adsFreeUntil = null;
   G.activeSkin = null;
   G.ownedSkins = [];
   G.lastAdTime = 0;
@@ -313,6 +323,31 @@ window.Game = window.Game || {};
 
   /** Минимальная сумма в голосах для VKWebAppOpenPayForm (при необходимости измените). */
   G.VK_DONATE_MIN_VOTES = 7;
+  /** Значения по умолчанию; переопределяются meta vk-ads-week-votes / vk-ads-year-votes. */
+  G.VK_ADS_WEEK_VOTES = 100;
+  G.VK_ADS_YEAR_VOTES = 1500;
+
+  G.isAdsSuppressed = function () {
+    if (G.showAds === false) return true;
+    if (typeof G.adsFreeUntil === "number" && G.adsFreeUntil > Date.now()) return true;
+    return false;
+  };
+
+  G.extendAdsFreePeriod = function (durationMs) {
+    var now = Date.now();
+    var base = (typeof G.adsFreeUntil === "number" && G.adsFreeUntil > now) ? G.adsFreeUntil : now;
+    G.adsFreeUntil = base + durationMs;
+    if (G.saveCloud) G.saveCloud();
+  };
+
+  G.openVkPayNoAds = function (plan) {
+    void plan;
+    var hint = document.getElementById("adNoticePayHint");
+    if (hint) {
+      hint.textContent = G.t("donateVkOnlyHintText");
+      hint.hidden = false;
+    }
+  };
 
   G.openVotesDonate = function () {
     var el = document.getElementById("donateVkOnlyHint");

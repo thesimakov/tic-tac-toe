@@ -38,6 +38,9 @@
     }
     if (Array.isArray(settings.ownedSkins)) G.ownedSkins = settings.ownedSkins.slice();
     if (settings.showAds === false) G.showAds = false;
+    if (typeof settings.adsFreeUntil === "number" && !Number.isNaN(settings.adsFreeUntil)) {
+      G.adsFreeUntil = settings.adsFreeUntil;
+    }
     if (settings.manualLang === "ru" || settings.manualLang === "en") G.manualLang = settings.manualLang;
 
     if (typeof settings.coins === "number" && !Number.isNaN(settings.coins)) {
@@ -170,6 +173,9 @@
         stats: { wins: G.stats.wins, losses: G.stats.losses, draws: G.stats.draws },
         coins: Math.max(0, Math.floor(G.coins || 0))
       };
+      if (typeof G.adsFreeUntil === "number" && !Number.isNaN(G.adsFreeUntil)) {
+        settings.adsFreeUntil = G.adsFreeUntil;
+      }
       if (G.manualLang === "ru" || G.manualLang === "en") settings.manualLang = G.manualLang;
       var payload = JSON.stringify({ settings: settings });
       try { localStorage.setItem(LS_FALLBACK, payload); } catch (e) {}
@@ -180,7 +186,7 @@
     };
 
     G.showInterstitialAd = function (afterCallback) {
-      if (!G.showAds || !getBridge()) {
+      if ((G.isAdsSuppressed && G.isAdsSuppressed()) || !getBridge()) {
         if (afterCallback) afterCallback();
         return;
       }
@@ -195,7 +201,7 @@
     };
 
     G.showNewGameInterstitial = function (afterCallback) {
-      if (!G.showAds) {
+      if (G.isAdsSuppressed && G.isAdsSuppressed()) {
         if (afterCallback) afterCallback(false);
         return;
       }
@@ -263,6 +269,53 @@
       var n = parseInt(String(m.content).trim(), 10);
       return Number.isNaN(n) || n <= 0 ? null : n;
     }
+
+    function readMetaVotes(name, fallback) {
+      var m = document.querySelector('meta[name="' + name + '"]');
+      if (!m || !m.content) return fallback;
+      var n = parseInt(String(m.content).trim(), 10);
+      return Number.isNaN(n) || n <= 0 ? fallback : n;
+    }
+
+    var ADS_FREE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+    var ADS_FREE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
+    G.openVkPayNoAds = function (plan) {
+      var b = getBridge();
+      var hint = document.getElementById("adNoticePayHint");
+      var appId = getVkAppIdFromQuery();
+      if (hint) hint.hidden = true;
+      if (!b || !appId) {
+        if (hint) {
+          hint.textContent = G.t("donateVkOnlyHintText");
+          hint.hidden = false;
+        }
+        return;
+      }
+      var isYear = plan === "year";
+      var votes = isYear
+        ? readMetaVotes("vk-ads-year-votes", typeof G.VK_ADS_YEAR_VOTES === "number" ? G.VK_ADS_YEAR_VOTES : 1500)
+        : readMetaVotes("vk-ads-week-votes", typeof G.VK_ADS_WEEK_VOTES === "number" ? G.VK_ADS_WEEK_VOTES : 100);
+      var desc = isYear ? G.t("adPayYearDesc") : G.t("adPayWeekDesc");
+      var duration = isYear ? ADS_FREE_YEAR_MS : ADS_FREE_WEEK_MS;
+      var groupId = getDonateGroupIdFromMeta();
+      var payload = groupId
+        ? { app_id: appId, action: "pay-to-group", params: { group_id: groupId, amount: votes, description: desc } }
+        : { app_id: appId, action: "pay-to-service", params: { amount: votes, description: desc } };
+
+      b.send("VKWebAppOpenPayForm", payload)
+        .then(function () {
+          if (G.extendAdsFreePeriod) G.extendAdsFreePeriod(duration);
+          if (G.closeAdNoticeModal) G.closeAdNoticeModal();
+          if (G.resetGameLocal) G.resetGameLocal();
+        })
+        .catch(function () {
+          if (hint) {
+            hint.textContent = G.t("donateBridgeFail");
+            hint.hidden = false;
+          }
+        });
+    };
 
     G.openVotesDonate = function () {
       var b = getBridge();

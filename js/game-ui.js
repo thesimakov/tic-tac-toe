@@ -56,7 +56,6 @@
     levelEasyBtn.textContent = t("easy"); levelNormalBtn.textContent = t("normal"); levelHardBtn.textContent = t("hard");
     playAgainBtn.textContent = t("playAgain");
     celebrationBanner.textContent = t("bannerWin");
-    if ($("howToPlay")) $("howToPlay").textContent = t("howToPlay");
     if (hintBtn) hintBtn.textContent = t("hintBtn");
     if (shopBtn) shopBtn.textContent = t("shop");
     if ($("shopCloseBtn")) {
@@ -80,6 +79,9 @@
     if ($("adNoticeTitle")) $("adNoticeTitle").textContent = t("adNoticeTitle");
     if (adNoticeText) adNoticeText.textContent = t("adNoticeBody");
     if (adNoticeOkBtn) adNoticeOkBtn.textContent = t("adNoticeOk");
+    if ($("adNoticeNoAdsTitle")) $("adNoticeNoAdsTitle").textContent = t("adNoAdsOffer");
+    if ($("adNoticePayWeekBtn")) $("adNoticePayWeekBtn").textContent = t("adPayWeekBtn");
+    if ($("adNoticePayYearBtn")) $("adNoticePayYearBtn").textContent = t("adPayYearBtn");
     if (userCoinsLabel) userCoinsLabel.textContent = t("coins") + ":";
     if (userCoinsWrap) userCoinsWrap.setAttribute("title", t("coins"));
     if ($("appMain")) $("appMain").setAttribute("aria-label", t("title"));
@@ -158,6 +160,11 @@
     if ($("adNoticeTitle")) $("adNoticeTitle").textContent = G.t("adNoticeTitle");
     if (adNoticeText) adNoticeText.textContent = G.t("adNoticeBody");
     if (adNoticeOkBtn) adNoticeOkBtn.textContent = G.t("adNoticeOk");
+    if ($("adNoticeNoAdsTitle")) $("adNoticeNoAdsTitle").textContent = G.t("adNoAdsOffer");
+    if ($("adNoticePayWeekBtn")) $("adNoticePayWeekBtn").textContent = G.t("adPayWeekBtn");
+    if ($("adNoticePayYearBtn")) $("adNoticePayYearBtn").textContent = G.t("adPayYearBtn");
+    var payHint = $("adNoticePayHint");
+    if (payHint) payHint.hidden = true;
     if (adNoticeModal) adNoticeModal.classList.add("show");
   };
 
@@ -168,7 +175,7 @@
       if (G.onNewGame) G.onNewGame();
       return;
     }
-    if (!G.showAds) {
+    if (G.isAdsSuppressed && G.isAdsSuppressed()) {
       G.closeModal();
       G.resetGameLocal();
       return;
@@ -850,6 +857,8 @@
   });
 
   if (adNoticeOkBtn) adNoticeOkBtn.addEventListener("click", function () { afterAdNoticeConfirmed(); });
+  if ($("adNoticePayWeekBtn")) $("adNoticePayWeekBtn").addEventListener("click", function () { if (G.openVkPayNoAds) G.openVkPayNoAds("week"); });
+  if ($("adNoticePayYearBtn")) $("adNoticePayYearBtn").addEventListener("click", function () { if (G.openVkPayNoAds) G.openVkPayNoAds("year"); });
   if (adNoticeModal) adNoticeModal.addEventListener("click", function (e) { if (e.target === adNoticeModal) G.closeAdNoticeModal(); });
 
   if (donateFabBtn) donateFabBtn.addEventListener("click", function () { G.openDonateModal(); });
@@ -870,7 +879,7 @@
   });
 
   if (hintBtn) hintBtn.addEventListener("click", function () {
-    if (G.showAds && G.showRewardedAd) G.showRewardedAd(doHint);
+    if (!(G.isAdsSuppressed && G.isAdsSuppressed()) && G.showRewardedAd) G.showRewardedAd(doHint);
     else doHint();
   });
   if (shopBtn) shopBtn.addEventListener("click", function () { G.openShop(); });

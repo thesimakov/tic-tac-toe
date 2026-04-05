@@ -58,7 +58,7 @@
   };
 
   G.showInterstitialAd = function (afterCallback) {
-    if (!G.showAds || !G.ysdk) { if (afterCallback) afterCallback(); return; }
+    if ((G.isAdsSuppressed && G.isAdsSuppressed()) || !G.ysdk) { if (afterCallback) afterCallback(); return; }
     var now = Date.now();
     if (now - G.lastAdTime < AD_COOLDOWN) { if (afterCallback) afterCallback(); return; }
     G.ysdk.adv.showFullscreenAdv({
@@ -81,7 +81,7 @@
 
   /** Полноэкранная реклама при «Новая игра» — каждый раз, без кулдауна. afterCallback(earnedReward). */
   G.showNewGameInterstitial = function (afterCallback) {
-    if (!G.showAds) {
+    if (G.isAdsSuppressed && G.isAdsSuppressed()) {
       if (afterCallback) afterCallback(false);
       return;
     }
@@ -192,6 +192,7 @@
         }
         if (Array.isArray(s.ownedSkins)) G.ownedSkins = s.ownedSkins;
         if (s.showAds === false) G.showAds = false;
+        if (typeof s.adsFreeUntil === "number" && !Number.isNaN(s.adsFreeUntil)) G.adsFreeUntil = s.adsFreeUntil;
         if (s.manualLang === "ru" || s.manualLang === "en") G.manualLang = s.manualLang;
       }
 
@@ -232,6 +233,7 @@
       stats: { wins: G.stats.wins, losses: G.stats.losses, draws: G.stats.draws },
       coins: Math.max(0, Math.floor(G.coins || 0))
     };
+    if (typeof G.adsFreeUntil === "number" && !Number.isNaN(G.adsFreeUntil)) settings.adsFreeUntil = G.adsFreeUntil;
     if (G.manualLang === "ru" || G.manualLang === "en") settings.manualLang = G.manualLang;
 
     var flush = true;

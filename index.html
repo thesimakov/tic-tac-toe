@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <!-- Для доната голосами сообществу: числовой id группы VK (без минуса). Пусто — форма pay-to-service приложения. -->
   <meta name="vk-donate-group-id" content="">
+  <!-- Суммы в голосах для VKWebAppOpenPayForm («отключить рекламу» в модалке перед рекламой). Подстройте под курс и кабинет ВК. -->
+  <meta name="vk-ads-week-votes" content="100">
+  <meta name="vk-ads-year-votes" content="1500">
   <title>Крестики-нолики</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -49,7 +52,6 @@
     <header class="app-header">
       <span class="corner-note" aria-hidden="true">5+</span>
       <h1 class="title" id="titleText">Крестики-нолики</h1>
-      <p class="how-to-play" id="howToPlay">Нажимайте на клетки, чтобы ставить фигуры. Выстройте ряд своих фигур — по горизонтали, вертикали или диагонали.</p>
     </header>
     <div class="status" id="status" aria-live="polite"></div>
 
@@ -146,6 +148,12 @@
     <div class="modal-card">
       <h2 class="modal-title" id="adNoticeTitle">Реклама</h2>
       <p class="modal-text" id="adNoticeText"></p>
+      <p class="ad-notice-no-ads-title" id="adNoticeNoAdsTitle"></p>
+      <div class="ad-notice-pay-row">
+        <button type="button" class="btn btn-tiny" id="adNoticePayWeekBtn"></button>
+        <button type="button" class="btn btn-tiny accent" id="adNoticePayYearBtn"></button>
+      </div>
+      <p class="donate-modal-hint donate-modal-hint--vk" id="adNoticePayHint" hidden></p>
       <button class="btn accent" id="adNoticeOkBtn" type="button">Хорошо</button>
     </div>
   </div>

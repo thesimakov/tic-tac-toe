@@ -189,9 +189,12 @@ const MIME = {
 
 /* ---- VK leaderboard API (проверка подписи launch params, см. README) ---- */
 const LB_VK_PATH = "/api/lb/vk";
+/** Callback для серверных уведомлений о платежах VK — укажите в кабинете приложения (HTTPS). */
+const VK_PAYMENT_NOTIFY_PATH = "/api/vk/payment-notification";
 const LB_VK_FILE = path.join(__dirname, "lb-vk.json");
 const VK_PROTECTED_KEY = String(process.env.VK_PROTECTED_KEY || "").trim();
 const LB_VK_MAX_BODY = 65536;
+const VK_PAYMENT_NOTIFY_MAX_BODY = 65536;
 
 function lbSendJson(res, status, obj) {
   const body = JSON.stringify(obj);
@@ -347,12 +350,72 @@ function handleLbVkPost(req, res) {
     });
 }
 
+function vkPaymentNotifySendOk(res) {
+  res.writeHead(200, {
+    "Content-Type": "text/plain; charset=utf-8",
+    "Cache-Control": "no-store"
+  });
+  res.end("OK");
+}
+
+/** Заготовка: логирует уведомление. Перед доверием данным проверьте подпись по документации VK Pay. */
+function handleVkPaymentNotifyPost(req, res) {
+  readReqBody(req, VK_PAYMENT_NOTIFY_MAX_BODY)
+    .then((raw) => {
+      let parsed = {};
+      const ct = (req.headers["content-type"] || "").toLowerCase();
+      if (ct.includes("application/json")) {
+        try {
+          parsed = JSON.parse(raw || "{}");
+        } catch {
+          parsed = { _raw: raw };
+        }
+      } else {
+        try {
+          const sp = new URLSearchParams(raw || "");
+          for (const [k, v] of sp) parsed[k] = v;
+        } catch {
+          parsed = { _raw: raw };
+        }
+      }
+      console.log("[vk-payment-notify]", new Date().toISOString(), parsed);
+      vkPaymentNotifySendOk(res);
+    })
+    .catch((err) => {
+      if (err && err.message === "too_large") {
+        res.writeHead(413);
+        res.end();
+        return;
+      }
+      res.writeHead(500);
+      res.end();
+    });
+}
+
 const server = http.createServer((req, res) => {
   let pathname;
   try {
     pathname = new URL(req.url || "/", "http://127.0.0.1").pathname;
   } catch {
     pathname = "/";
+  }
+
+  if (pathname === VK_PAYMENT_NOTIFY_PATH) {
+    if (req.method === "GET") {
+      res.writeHead(200, {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store"
+      });
+      res.end("vk payment notify");
+      return;
+    }
+    if (req.method === "POST") {
+      handleVkPaymentNotifyPost(req, res);
+      return;
+    }
+    res.writeHead(405);
+    res.end();
+    return;
   }
 
   if (pathname === LB_VK_PATH) {

@@ -201,7 +201,7 @@
     G.shareRoomVk = function () {
       var b = getBridge();
       var el = document.getElementById("roomCodeText");
-      var code = el ? el.textContent.trim() : "";
+      var code = (el ? el.textContent.trim() : "") || (G.hostRoomCode || "").trim();
       if (!b || !code) return;
       var link = G.getJoinLinkForRoom ? G.getJoinLinkForRoom(code) : "";
       b.send("VKWebAppShare", {

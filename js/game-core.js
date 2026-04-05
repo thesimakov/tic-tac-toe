@@ -318,6 +318,8 @@ window.Game = window.Game || {};
   G.onlineWs = null;
   G.onlineRole = null;
   G.myOnlineSymbol = null;
+  /** Код комнаты хоста (пригласить друга); дублируется в DOM при смене языка / UI. */
+  G.hostRoomCode = "";
 
   /* SDK state */
   G.ysdk = null;

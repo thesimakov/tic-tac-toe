@@ -155,6 +155,7 @@
     if ($("joinRoomBtn")) $("joinRoomBtn").textContent = t("join");
     if ($("copyCodeBtn")) $("copyCodeBtn").textContent = t("copy");
     if ($("roomCodeLabel")) $("roomCodeLabel").textContent = t("roomCode") + ":";
+    if ($("roomCodeText") && G.hostRoomCode) $("roomCodeText").textContent = G.hostRoomCode;
     if ($("joinCodeInput")) {
       $("joinCodeInput").setAttribute("aria-label", t("roomCode"));
       $("joinCodeInput").setAttribute("placeholder", t("roomCode"));

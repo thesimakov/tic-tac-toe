@@ -48,21 +48,20 @@
     if (G.isAdsSuppressed && G.isAdsSuppressed()) return;
     var b = getBridge();
     if (!b) return;
+    var params = {
+      banner_location: "bottom",
+      banner_align: "right",
+      layout_type: "overlay",
+      orientation: "vertical",
+      height_type: "regular"
+    };
     var run = function () {
       b.send("VKWebAppCheckBannerAd", {})
-        .then(function (check) {
-          var ok = Boolean(
-            check &&
-              (check.result === true || check.result === "true" || check.success === true)
-          );
-          if (!ok) return null;
-          return b.send("VKWebAppShowBannerAd", {
-            banner_location: "bottom",
-            banner_align: "right",
-            layout_type: "overlay",
-            orientation: "vertical",
-            height_type: "regular"
-          });
+        .catch(function () {
+          return null;
+        })
+        .then(function () {
+          return b.send("VKWebAppShowBannerAd", params);
         })
         .catch(function () {});
     };

@@ -109,7 +109,6 @@
     if ($("loginBtn")) $("loginBtn").textContent = t("login");
     if ($("lbTitle")) $("lbTitle").textContent = t("leaderboard");
     if ($("vkAdsTitle")) $("vkAdsTitle").textContent = t("vkAdsTitle");
-    if ($("vkAdsHint")) $("vkAdsHint").textContent = t("vkAdsHint");
     if ($("vkAdsBannerSlot")) $("vkAdsBannerSlot").setAttribute("aria-label", t("vkAdsSlotAria"));
     if (lbRefreshBtn) lbRefreshBtn.textContent = t("lbRefresh");
     if (lbToggleBtn) {

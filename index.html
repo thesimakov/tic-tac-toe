@@ -15,6 +15,7 @@
   <!-- Суммы в голосах для VKWebAppOpenPayForm («отключить рекламу» в модалке перед рекламой). Подстройте под курс и кабинет ВК. -->
   <meta name="vk-ads-week-votes" content="100">
   <meta name="vk-ads-year-votes" content="1500">
+  <!-- Баннер ВК: тестовые объявления включаются в настройках приложения (Мини-приложения → монетизация / реклама). До модерации показ возможен в режиме тестирования от имени администраторов приложения. -->
   <!-- WebSocket для онлайна (необязательно). Пустой content = берётся адрес из js/game-online.js. Пример: content="wss://ваш-сервис.onrender.com" -->
   <meta name="game-ws-url" content="">
   <!-- Рейтинг VK: полный URL API (например https://ваш-сервер.onrender.com/api/lb/vk). Пусто = тот же origin, что у страницы (удобно при node server.js на :8080). -->
@@ -149,7 +150,6 @@
   <aside class="vk-ads-panel" id="vkAdsPanel" aria-labelledby="vkAdsTitle" hidden>
     <h2 class="vk-ads-panel-title" id="vkAdsTitle">Реклама</h2>
     <div class="vk-ads-slot" id="vkAdsBannerSlot" aria-label=""></div>
-    <p class="vk-ads-hint" id="vkAdsHint"></p>
   </aside>
   </div>
 

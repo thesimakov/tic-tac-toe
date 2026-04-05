@@ -109,14 +109,15 @@
   function showVkUser(player) {
     var loginBtn = document.getElementById("loginBtn");
     var userAvatar = document.getElementById("userAvatar");
-    var userName = document.getElementById("userName");
+    var userAvatarBtn = document.getElementById("userAvatarBtn");
     if (loginBtn) loginBtn.hidden = true;
-    var name = player.getName();
+    var name = player.getName() || "";
+    G.playerDisplayName = name;
     var photo = player.getPhoto("small");
-    if (userName) userName.textContent = name;
     if (photo && userAvatar) {
       userAvatar.src = photo;
       userAvatar.hidden = false;
+      if (userAvatarBtn) userAvatarBtn.hidden = false;
     }
   }
 
@@ -336,7 +337,7 @@
         });
     };
 
-    G.openVotesDonate = function () {
+    G.openVotesDonate = function (amountVotes) {
       var b = getBridge();
       var hint = document.getElementById("donateVkOnlyHint");
       var appId = getVkAppIdFromQuery();
@@ -350,7 +351,9 @@
         return;
       }
 
-      var amount = typeof G.VK_DONATE_MIN_VOTES === "number" ? G.VK_DONATE_MIN_VOTES : 7;
+      var allowed = Array.isArray(G.DONATE_VOTE_AMOUNTS) ? G.DONATE_VOTE_AMOUNTS : [1, 5, 10, 50, 100];
+      var amount = Math.floor(Number(amountVotes));
+      if (allowed.indexOf(amount) === -1) amount = allowed[0] || 1;
       var desc = G.t("donatePayDescription");
       var groupId = getDonateGroupIdFromMeta();
       var payload = groupId

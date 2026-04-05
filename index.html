@@ -38,14 +38,16 @@
           <rect x="15" y="11" width="5" height="10" rx="1.2" fill="currentColor"/>
         </svg>
       </button>
-      <img class="user-avatar" id="userAvatar" alt="" hidden>
-      <span class="user-name" id="userName"></span>
       <span class="user-coins" id="userCoinsWrap" title="">
         <span class="user-coins-label" id="userCoinsLabel"></span>
         <span class="user-coins-value" id="coinsValue">0</span>
       </span>
       <button class="btn btn-login" id="loginBtn" type="button" hidden>Войти</button>
       <button class="btn btn-tiny" id="shopBtn" type="button">Магазин</button>
+      <button type="button" class="user-avatar-btn" id="userAvatarBtn" hidden
+        aria-haspopup="dialog" aria-expanded="false" aria-controls="profileModal">
+        <img class="user-avatar" id="userAvatar" alt="" width="30" height="30" decoding="async" hidden>
+      </button>
     </div>
 
     <header class="app-header">
@@ -215,7 +217,27 @@
       <h2 class="modal-title" id="donateModalTitle"></h2>
       <p class="modal-text" id="donateModalText"></p>
       <p class="donate-modal-hint donate-modal-hint--vk" id="donateVkOnlyHint" hidden></p>
-      <button type="button" class="btn accent donate-modal-submit" id="donateSubmitBtn"></button>
+      <div class="donate-votes-grid" id="donateVotesGrid" role="group" aria-label="">
+        <button type="button" class="btn accent donate-vote-btn" data-votes="1"></button>
+        <button type="button" class="btn accent donate-vote-btn" data-votes="5"></button>
+        <button type="button" class="btn accent donate-vote-btn" data-votes="10"></button>
+        <button type="button" class="btn accent donate-vote-btn" data-votes="50"></button>
+        <button type="button" class="btn accent donate-vote-btn donate-vote-btn--wide" data-votes="100"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal profile-modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalHeading">
+    <div class="modal-card profile-modal-card">
+      <button type="button" class="shop-dismiss profile-modal-close" id="profileModalCloseBtn" aria-label="">
+        <span class="shop-dismiss-icon" aria-hidden="true"></span>
+      </button>
+      <img class="profile-modal-avatar" id="profileModalAvatar" alt="" width="88" height="88" decoding="async" hidden>
+      <h2 class="modal-title profile-modal-heading" id="profileModalHeading"></h2>
+      <p class="profile-modal-name" id="profileModalName"></p>
+      <p class="profile-modal-meta" id="profileModalCoins"></p>
+      <p class="profile-modal-meta profile-modal-meta--stats" id="profileModalStats"></p>
+      <button type="button" class="btn" id="profileModalOkBtn"></button>
     </div>
   </div>
 

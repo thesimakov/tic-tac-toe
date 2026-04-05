@@ -86,7 +86,10 @@
     connectToPlay: "Қарсылас табыңыз немесе бөлме кодын енгізіңіз.",
     donateFabAria: "Жобаны қолдау",
     donateTitle: "Сіздің демеуіңіз маңызды",
-    donateBody: "Рақмет. Төмендегі түйме VK дауыстары арқылы төлем формасын ашады.",
+    donateBody: "Рақмет. Дауыс санын таңдаңыз — VK төлем формасы ашылады.",
+    donateVoteOne: "1 дауыс",
+    donateVotesPlural: "дауыс",
+    donateVotesGroupAria: "VK дауыстарымен қайырымдылық сомасы",
     donateSubmit: "Қайырымдылық",
     donatePayDescription: "Ойынды дамытуға қайырымдылық",
     donateVkOnlyHintText: "Дауыспен төлем VK қосымшасында ғана қолжетімді.",
@@ -96,7 +99,10 @@
     shopCoinsShort: "тиын",
     shopPerDaySuffix: "(тәулік)",
     shopNotEnoughCoins: "Тиын жеткіліксіз.",
-    shopPurchaseOk: "Сатып алу рәсімделді!"
+    shopPurchaseOk: "Сатып алу рәсімделді!",
+    profileTitle: "Профиль",
+    profileAvatarBtnAria: "Профиль",
+    profileStatsCaption: "Статистика"
   };
 
   G.texts.uz = {
@@ -181,7 +187,10 @@
     connectToPlay: "Raqib toping yoki xona kodini kiriting.",
     donateFabAria: "Loyihani qo‘llab-quvvatlash",
     donateTitle: "Xayringiz muhim",
-    donateBody: "Rahmat. Quyidagi tugma VK ovozlari orqali to‘lov formasini ochadi.",
+    donateBody: "Rahmat. Ovoz miqdorini tanlang — VK to‘lov formasi ochiladi.",
+    donateVoteOne: "1 ovoz",
+    donateVotesPlural: "ovoz",
+    donateVotesGroupAria: "VK ovozlarida xayriya miqdori",
     donateSubmit: "Xayriya",
     donatePayDescription: "O‘yinni rivojlantirishga xayriya",
     donateVkOnlyHintText: "Ovoz bilan to‘lov faqat VK ilovasida.",
@@ -191,7 +200,10 @@
     shopCoinsShort: "tanga",
     shopPerDaySuffix: "(kun)",
     shopNotEnoughCoins: "Tanga yetarli emas.",
-    shopPurchaseOk: "Xarid muvaffaqiyatli!"
+    shopPurchaseOk: "Xarid muvaffaqiyatli!",
+    profileTitle: "Profil",
+    profileAvatarBtnAria: "Profil",
+    profileStatsCaption: "Statistika"
   };
 
   G.texts.tg = {
@@ -276,7 +288,10 @@
     connectToPlay: "Ҳариф ёбед ё рамзи уторо ворид кунед.",
     donateFabAria: "Лоиҳаро дастгирӣ кардан",
     donateTitle: "Кӯмаки шумо муҳим аст",
-    donateBody: "Ташаккур. Тугмаи зер формаи пардохти овозҳои VK-ро мекушояд.",
+    donateBody: "Ташаккур. Миқдори овозро интихоб кунед — формаи пардохти VK кушода мешавад.",
+    donateVoteOne: "1 овоз",
+    donateVotesPlural: "овоз",
+    donateVotesGroupAria: "Миқдори хайрия бо овозҳои VK",
     donateSubmit: "Хайрия",
     donatePayDescription: "Хайрия барои рушди бозӣ",
     donateVkOnlyHintText: "Пардохт бо овоз танҳо дар барномаи VK дастрас аст.",
@@ -286,7 +301,10 @@
     shopCoinsShort: "танга",
     shopPerDaySuffix: "(шаб)",
     shopNotEnoughCoins: "Танга кофӣ нест.",
-    shopPurchaseOk: "Харид анҷом ёфт!"
+    shopPurchaseOk: "Харид анҷом ёфт!",
+    profileTitle: "Профил",
+    profileAvatarBtnAria: "Профил",
+    profileStatsCaption: "Статистика"
   };
 
   G.langNativeNames = {

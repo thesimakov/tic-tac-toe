@@ -27,7 +27,9 @@
     robotModeBtn = $("robotModeBtn"),
     modeDifficultyRow = $("modeDifficultyRow"),
     donateModal = $("donateModal"), donateFabBtn = $("donateFabBtn"),
-    donateModalCloseBtn = $("donateModalCloseBtn"), donateSubmitBtn = $("donateSubmitBtn");
+    donateModalCloseBtn = $("donateModalCloseBtn"), donateVotesGrid = $("donateVotesGrid"),
+    profileModal = $("profileModal"), profileModalCloseBtn = $("profileModalCloseBtn"),
+    profileModalOkBtn = $("profileModalOkBtn"), userAvatarBtn = $("userAvatarBtn");
 
   var celebrationTimers = [];
 
@@ -153,10 +155,31 @@
     }
     if ($("donateModalTitle")) $("donateModalTitle").textContent = t("donateTitle");
     if ($("donateModalText")) $("donateModalText").textContent = t("donateBody");
-    if (donateSubmitBtn) donateSubmitBtn.textContent = t("donateSubmit");
+    if (donateVotesGrid) {
+      donateVotesGrid.setAttribute("aria-label", t("donateVotesGroupAria"));
+      var dvBtns = donateVotesGrid.querySelectorAll(".donate-vote-btn");
+      for (var di = 0; di < dvBtns.length; di++) {
+        var b = dvBtns[di];
+        var vn = Number(b.getAttribute("data-votes"));
+        if (!Number.isFinite(vn)) continue;
+        var lbl = G.donateVotesLabel ? G.donateVotesLabel(vn) : String(vn);
+        b.textContent = lbl;
+        b.setAttribute("aria-label", lbl);
+      }
+    }
     if (donateModalCloseBtn) {
       donateModalCloseBtn.setAttribute("aria-label", t("donateCloseAria"));
       donateModalCloseBtn.setAttribute("title", t("donateCloseAria"));
+    }
+    if ($("profileModalHeading")) $("profileModalHeading").textContent = t("profileTitle");
+    if (profileModalOkBtn) profileModalOkBtn.textContent = t("close");
+    if (profileModalCloseBtn) {
+      profileModalCloseBtn.setAttribute("aria-label", t("close"));
+      profileModalCloseBtn.setAttribute("title", t("close"));
+    }
+    if (userAvatarBtn) {
+      userAvatarBtn.setAttribute("aria-label", t("profileAvatarBtnAria"));
+      userAvatarBtn.setAttribute("title", t("profileAvatarBtnAria"));
     }
     G.applyBoardLayout();
     G.updateDifficultyCurrentLabel();
@@ -168,6 +191,40 @@
 
   G.updateCoinsUI = function () {
     if (coinsValueEl) coinsValueEl.textContent = String(Math.max(0, Math.floor(G.coins || 0)));
+    if (profileModal && profileModal.classList.contains("show") && G.syncProfileModalContent) G.syncProfileModalContent();
+  };
+
+  G.syncProfileModalContent = function () {
+    var t = G.t.bind(G);
+    var rawName = G.playerDisplayName && String(G.playerDisplayName).trim();
+    var displayName = rawName ? rawName : t("guest");
+    if ($("profileModalName")) $("profileModalName").textContent = displayName;
+    var av = $("userAvatar");
+    var pmAv = $("profileModalAvatar");
+    if (pmAv) {
+      if (av && av.getAttribute("src") && !av.hidden) {
+        pmAv.src = av.src;
+        pmAv.hidden = false;
+      } else {
+        pmAv.removeAttribute("src");
+        pmAv.hidden = true;
+      }
+    }
+    if ($("profileModalCoins")) $("profileModalCoins").textContent = t("coins") + ": " + String(Math.max(0, Math.floor(G.coins || 0)));
+    if ($("profileModalStats")) {
+      $("profileModalStats").textContent = t("profileStatsCaption") + ": " + G.stats.wins + " / " + G.stats.losses + " / " + G.stats.draws;
+    }
+  };
+
+  G.openProfileModal = function () {
+    if (G.syncProfileModalContent) G.syncProfileModalContent();
+    if (profileModal) profileModal.classList.add("show");
+    if (userAvatarBtn) userAvatarBtn.setAttribute("aria-expanded", "true");
+  };
+
+  G.closeProfileModal = function () {
+    if (profileModal) profileModal.classList.remove("show");
+    if (userAvatarBtn) userAvatarBtn.setAttribute("aria-expanded", "false");
   };
 
   G.closeAdNoticeModal = function () { if (adNoticeModal) adNoticeModal.classList.remove("show"); };
@@ -186,6 +243,7 @@
 
   G.openAdNoticeBeforeNewGame = function () {
     G.closeModal();
+    G.closeProfileModal();
     if ($("adNoticeTitle")) $("adNoticeTitle").textContent = G.t("adNoticeTitle");
     if (adNoticeText) adNoticeText.textContent = G.t("adNoticeBody");
     if (adNoticeOkBtn) adNoticeOkBtn.textContent = G.t("adNoticeOk");
@@ -198,6 +256,7 @@
 
   G.onNewGameWithAdFlow = function () {
     G.closeShop();
+    G.closeProfileModal();
     if (G.isOnline()) {
       G.closeModal();
       if (G.onNewGame) G.onNewGame();
@@ -313,6 +372,7 @@
     if (statsWinsEl) statsWinsEl.textContent = G.stats.wins;
     if (statsLossesEl) statsLossesEl.textContent = G.stats.losses;
     if (statsDrawsEl) statsDrawsEl.textContent = G.stats.draws;
+    if (profileModal && profileModal.classList.contains("show") && G.syncProfileModalContent) G.syncProfileModalContent();
   };
 
   /* ---- leaderboard (боковая панель / мобильный drawer) ---- */
@@ -910,7 +970,7 @@
   resultModal.addEventListener("click", function (e) { if (e.target === resultModal) G.closeModal(); });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
-      closeDiff(); closeBoardSize(); G.closeModal(); G.closeShop(); G.closeAdNoticeModal(); G.closeLeaderboard(); G.closeDonateModal();
+      closeDiff(); closeBoardSize(); G.closeModal(); G.closeShop(); G.closeAdNoticeModal(); G.closeLeaderboard(); G.closeDonateModal(); G.closeProfileModal();
     }
   });
 
@@ -933,7 +993,20 @@
   if (donateFabBtn) donateFabBtn.addEventListener("click", function () { G.openDonateModal(); });
   if (donateModalCloseBtn) donateModalCloseBtn.addEventListener("click", function () { G.closeDonateModal(); });
   if (donateModal) donateModal.addEventListener("click", function (e) { if (e.target === donateModal) G.closeDonateModal(); });
-  if (donateSubmitBtn) donateSubmitBtn.addEventListener("click", function () { if (G.openVotesDonate) G.openVotesDonate(); });
+  if (donateVotesGrid) {
+    donateVotesGrid.addEventListener("click", function (e) {
+      var btn = e.target.closest(".donate-vote-btn");
+      if (!btn || !donateVotesGrid.contains(btn)) return;
+      var v = Number(btn.getAttribute("data-votes"));
+      if (!Number.isFinite(v)) return;
+      if (G.openVotesDonate) G.openVotesDonate(v);
+    });
+  }
+
+  if (userAvatarBtn) userAvatarBtn.addEventListener("click", function () { G.openProfileModal(); });
+  if (profileModalCloseBtn) profileModalCloseBtn.addEventListener("click", function () { G.closeProfileModal(); });
+  if (profileModalOkBtn) profileModalOkBtn.addEventListener("click", function () { G.closeProfileModal(); });
+  if (profileModal) profileModal.addEventListener("click", function (e) { if (e.target === profileModal) G.closeProfileModal(); });
 
   if (lbRefreshBtn) lbRefreshBtn.addEventListener("click", function () { G.openLeaderboard(); });
   if (lbToggleBtn) lbToggleBtn.addEventListener("click", function () { G.toggleLeaderboardDrawer(); });
@@ -983,5 +1056,6 @@
     G.resetGame();
     G.closeLeaderboard();
     G.closeDonateModal();
+    G.closeProfileModal();
   };
 })(window.Game);

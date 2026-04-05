@@ -138,7 +138,7 @@
     var loginBtn = document.getElementById("loginBtn");
     var userBar = document.getElementById("userBar");
     var userAvatar = document.getElementById("userAvatar");
-    var userName = document.getElementById("userName");
+    var userAvatarBtn = document.getElementById("userAvatarBtn");
 
     ysdk.getPlayer({ scopes: false }).then(function (player) {
       G.player = player;
@@ -155,10 +155,14 @@
 
     function showPlayerInfo(player) {
       if (loginBtn) loginBtn.hidden = true;
-      var name = player.getName() || G.t("guest");
+      var name = player.getName() || "";
+      G.playerDisplayName = name;
       var photo = player.getPhoto("small");
-      if (userName) userName.textContent = name;
-      if (photo && userAvatar) { userAvatar.src = photo; userAvatar.hidden = false; }
+      if (photo && userAvatar) {
+        userAvatar.src = photo;
+        userAvatar.hidden = false;
+        if (userAvatarBtn) userAvatarBtn.hidden = false;
+      }
       if (userBar) userBar.hidden = false;
     }
 

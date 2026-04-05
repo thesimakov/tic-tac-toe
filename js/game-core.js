@@ -88,7 +88,10 @@ window.Game = window.Game || {};
       connectToPlay: "Найдите соперника или введите код комнаты.",
       donateFabAria: "Поддержать проект",
       donateTitle: "Ваш донат важен для нас",
-      donateBody: "Спасибо за поддержку. По кнопке ниже откроется форма оплаты голосами ВКонтакте.",
+      donateBody: "Спасибо за поддержку. Выберите сумму в голосах — откроется форма оплаты ВКонтакте.",
+      donateVoteOne: "1 голос",
+      donateVotesPlural: "голосов",
+      donateVotesGroupAria: "Сумма пожертвования в голосах ВКонтакте",
       donateSubmit: "Пожертвовать",
       donatePayDescription: "Пожертвование на развитие игры",
       donateVkOnlyHintText: "Оплата голосами доступна в приложении ВКонтакте.",
@@ -98,7 +101,10 @@ window.Game = window.Game || {};
       shopCoinsShort: "монет",
       shopPerDaySuffix: "(сутки)",
       shopNotEnoughCoins: "Недостаточно монет.",
-      shopPurchaseOk: "Покупка оформлена!"
+      shopPurchaseOk: "Покупка оформлена!",
+      profileTitle: "Профиль",
+      profileAvatarBtnAria: "Профиль",
+      profileStatsCaption: "Статистика"
     },
     en: {
       title: "Tic-Tac-Toe",
@@ -182,7 +188,10 @@ window.Game = window.Game || {};
       connectToPlay: "Find an opponent or enter a room code.",
       donateFabAria: "Support the project",
       donateTitle: "Your donation means a lot",
-      donateBody: "Thank you. You can open VK’s in-app payment form using votes below.",
+      donateBody: "Thank you for your support. Choose an amount in votes to open the VK payment form.",
+      donateVoteOne: "1 vote",
+      donateVotesPlural: "votes",
+      donateVotesGroupAria: "Donation amount in VK votes",
       donateSubmit: "Donate",
       donateVkOnlyHintText: "Vote payments are available in the VK app.",
       donatePayDescription: "Donation to support the game",
@@ -192,7 +201,10 @@ window.Game = window.Game || {};
       shopCoinsShort: "coins",
       shopPerDaySuffix: "(per day)",
       shopNotEnoughCoins: "Not enough coins.",
-      shopPurchaseOk: "Purchase complete!"
+      shopPurchaseOk: "Purchase complete!",
+      profileTitle: "Profile",
+      profileAvatarBtnAria: "Profile",
+      profileStatsCaption: "Stats"
     }
   };
 
@@ -297,6 +309,7 @@ window.Game = window.Game || {};
   G.showAds = true;
   /** Время (ms), до которого действует оплата «без рекламы» через VKWebAppOpenPayForm. */
   G.adsFreeUntil = null;
+  G.playerDisplayName = "";
   G.activeSkin = null;
   G.ownedSkins = [];
   /** Срок аренды тем (мс): skin_id → timestamp окончания. */
@@ -446,8 +459,17 @@ window.Game = window.Game || {};
   G.disconnectOnlineSession = function () {};
   G.initOnline = function () {};
 
-  /** Минимальная сумма в голосах для VKWebAppOpenPayForm (при необходимости измените). */
-  G.VK_DONATE_MIN_VOTES = 7;
+  /** Допустимые суммы доната в голосах (VKWebAppOpenPayForm). */
+  G.DONATE_VOTE_AMOUNTS = [1, 5, 10, 50, 100];
+
+  /** @deprecated используйте DONATE_VOTE_AMOUNTS; оставлено для совместимости. */
+  G.VK_DONATE_MIN_VOTES = 1;
+
+  G.donateVotesLabel = function (n) {
+    var v = Math.floor(Number(n));
+    if (v === 1) return G.t("donateVoteOne");
+    return String(v) + "\u00a0" + G.t("donateVotesPlural");
+  };
   /** Значения по умолчанию; переопределяются meta vk-ads-week-votes / vk-ads-year-votes. */
   G.VK_ADS_WEEK_VOTES = 100;
   G.VK_ADS_YEAR_VOTES = 1500;
@@ -474,7 +496,11 @@ window.Game = window.Game || {};
     }
   };
 
-  G.openVotesDonate = function () {
+  G.openVotesDonate = function (amountVotes) {
+    var allowed = Array.isArray(G.DONATE_VOTE_AMOUNTS) ? G.DONATE_VOTE_AMOUNTS : [1, 5, 10, 50, 100];
+    var amount = Math.floor(Number(amountVotes));
+    if (allowed.indexOf(amount) === -1) amount = allowed[0] || 1;
+    void amount;
     var el = document.getElementById("donateVkOnlyHint");
     if (el) {
       el.textContent = G.t("donateVkOnlyHintText");

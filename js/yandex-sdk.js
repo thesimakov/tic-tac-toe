@@ -279,6 +279,7 @@
     });
   }
 
+  /* Аргумент { humanWin } из game-ui игнорируется — в Яндексе пишется суммарное число побед. */
   G.submitScore = function () {
     if (!lbInstance) return;
     lbInstance.setLeaderboardScore(LEADERBOARD_NAME, G.stats.wins).catch(function () {});

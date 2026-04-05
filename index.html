@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffd89a">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- Необязательно: числовой id приложения VK, если нет в URL (тест вне iframe). Иначе берётся из запуска / VKWebAppGetLaunchParams. -->
+  <meta name="vk-app-id" content="">
   <!-- Для доната голосами сообществу: числовой id группы VK (без минуса). Пусто — форма pay-to-service приложения. -->
   <meta name="vk-donate-group-id" content="">
   <!-- Суммы в голосах для VKWebAppOpenPayForm («отключить рекламу» в модалке перед рекламой). Подстройте под курс и кабинет ВК. -->
@@ -12,6 +14,8 @@
   <meta name="vk-ads-year-votes" content="1500">
   <!-- WebSocket для онлайна (необязательно). Пустой content = берётся адрес из js/game-online.js. Пример: content="wss://ваш-сервис.onrender.com" -->
   <meta name="game-ws-url" content="">
+  <!-- Рейтинг VK: полный URL API (например https://ваш-сервер.onrender.com/api/lb/vk). Пусто = тот же origin, что у страницы (удобно при node server.js на :8080). -->
+  <meta name="vk-lb-api-url" content="">
   <title>Крестики-нолики</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -151,7 +155,6 @@
           <h2 class="online-modal-heading" id="onlineSectionTitle"></h2>
         </div>
         <p class="online-status" id="onlineStatusText" aria-live="polite"></p>
-        <p class="online-server-hint" id="onlineServerHint" hidden></p>
         <div class="online-actions">
           <button type="button" class="btn" id="findMatchBtn"></button>
           <button type="button" class="btn" id="inviteFriendBtn"></button>

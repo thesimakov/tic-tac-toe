@@ -160,8 +160,6 @@
       $("joinCodeInput").setAttribute("placeholder", t("roomCode"));
     }
     if ($("disconnectOnlineBtn")) $("disconnectOnlineBtn").textContent = t("disconnect");
-    var osh = $("onlineServerHint");
-    if (osh && !osh.hidden) osh.textContent = t("noServerHint");
     if ($("shareVkBtn")) $("shareVkBtn").textContent = t("shareRoomVk");
     if ($("inviteVkBtn")) $("inviteVkBtn").textContent = t("inviteVkFriends");
     if (donateFabBtn) {
@@ -784,7 +782,7 @@
       G.showModal(t("draw"), t("drawMsg"));
     }
     G.updateStatsUI();
-    if (G.submitScore) G.submitScore();
+    if (G.submitScore) G.submitScore({ humanWin: isHumanWin });
     if (G.saveCloud) G.saveCloud();
   };
 

@@ -72,13 +72,6 @@
     return GAME_SERVER_URL;
   }
 
-  function setOnlineServerHint(visible) {
-    var h = document.getElementById("onlineServerHint");
-    if (!h) return;
-    h.hidden = !visible;
-    if (visible && G.t) h.textContent = G.t("noServerHint");
-  }
-
   function onWsMessage(event) {
     var data;
     try { data = JSON.parse(event.data); } catch (e) { return; }
@@ -160,7 +153,6 @@
 
   function onWsDisconnected() {
     var was = Boolean(G.onlineRole);
-    if (was) setOnlineServerHint(false);
     G.onlineRole = null; G.myOnlineSymbol = null; G.waitingForPeer = false;
     if (roomCodeRow) roomCodeRow.hidden = true;
     if (disconnectOnlineBtn) disconnectOnlineBtn.hidden = true;
@@ -177,12 +169,10 @@
     if (roomCodeRow) roomCodeRow.hidden = true;
     if (disconnectOnlineBtn) disconnectOnlineBtn.hidden = true;
     if (onlineStatusText) onlineStatusText.textContent = G.t("connecting");
-    setOnlineServerHint(false);
 
     var ws;
     try { ws = new WebSocket(getWsUrl()); } catch (e) {
       if (onlineStatusText) onlineStatusText.textContent = G.t("noServer");
-      setOnlineServerHint(true);
       return;
     }
     G.onlineWs = ws;
@@ -190,11 +180,9 @@
     ws.addEventListener("close", function () { if (G.onlineWs !== ws) return; G.onlineWs = null; onWsDisconnected(); });
     ws.addEventListener("error", function () {
       if (onlineStatusText) onlineStatusText.textContent = G.t("noServer");
-      setOnlineServerHint(true);
     });
     ws.addEventListener("open", function () {
       if (G.onlineWs !== ws) return;
-      setOnlineServerHint(false);
       if (onlineStatusText) onlineStatusText.textContent = "";
       afterOpen(ws);
     });
@@ -247,7 +235,6 @@
       G.onlineWs.close();
     }
     setSearchUI(false);
-    setOnlineServerHint(false);
     if (onlineStatusText) onlineStatusText.textContent = "";
     syncOnlineChrome();
   }

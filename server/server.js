@@ -3,6 +3,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const WebSocket = require("ws");
 
 const PORT = Number(process.env.PORT) || 8080;
@@ -186,22 +187,226 @@ const MIME = {
   ".svg": "image/svg+xml", ".ico": "image/x-icon"
 };
 
-const server = http.createServer((req, res) => {
-  const urlPath = (req.url || "/").split("?")[0];
-  if (req.method !== "GET") { res.writeHead(405); res.end(); return; }
+/* ---- VK leaderboard API (проверка подписи launch params, см. README) ---- */
+const LB_VK_PATH = "/api/lb/vk";
+const LB_VK_FILE = path.join(__dirname, "lb-vk.json");
+const VK_PROTECTED_KEY = String(process.env.VK_PROTECTED_KEY || "").trim();
+const LB_VK_MAX_BODY = 65536;
 
+function lbSendJson(res, status, obj) {
+  const body = JSON.stringify(obj);
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  });
+  res.end(body);
+}
+
+function lbCorsPreflight(res) {
+  res.writeHead(204, {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400"
+  });
+  res.end();
+}
+
+function vkBuildSignString(params) {
+  return Object.keys(params)
+    .filter((k) => k !== "sign" && k.startsWith("vk_"))
+    .sort()
+    .map((k) => `${k}=${params[k]}`)
+    .join("");
+}
+
+function verifyVkLaunchSign(params, secret) {
+  if (!secret || !params || typeof params !== "object") return false;
+  const sign = params.sign;
+  if (!sign || typeof sign !== "string") return false;
+  const s = vkBuildSignString(params);
+  const h = crypto.createHash("md5").update(s + secret).digest("hex");
+  return h === sign;
+}
+
+let lbVkData = { users: {} };
+function loadLbVkFile() {
+  try {
+    const raw = fs.readFileSync(LB_VK_FILE, "utf8");
+    const j = JSON.parse(raw);
+    if (j && j.users && typeof j.users === "object") lbVkData = j;
+  } catch {
+    lbVkData = { users: {} };
+  }
+}
+
+function saveLbVkFile() {
+  try {
+    fs.writeFileSync(LB_VK_FILE, JSON.stringify(lbVkData), "utf8");
+  } catch {
+    /* ephemeral FS и т.п. */
+  }
+}
+
+loadLbVkFile();
+
+const lbSubmitLast = new Map();
+
+function handleLbVkGet(res, limit) {
+  const users = Object.entries(lbVkData.users || {}).map(([id, row]) => ({
+    vkUserId: id,
+    name: (row && row.name) || "Player",
+    score: Math.max(0, Math.floor(Number((row && row.wins) || 0))),
+    avatar: (row && row.avatar) || ""
+  }));
+  users.sort((a, b) => b.score - a.score || String(a.vkUserId).localeCompare(String(b.vkUserId)));
+  const top = users.slice(0, limit).map((u, i) => ({
+    rank: i + 1,
+    name: u.name,
+    score: u.score,
+    avatar: u.avatar,
+    vkUserId: u.vkUserId
+  }));
+  lbSendJson(res, 200, { entries: top });
+}
+
+function readReqBody(req, maxLen) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let len = 0;
+    req.on("data", (ch) => {
+      len += ch.length;
+      if (len > maxLen) {
+        reject(new Error("too_large"));
+        return;
+      }
+      chunks.push(ch);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+function handleLbVkPost(req, res) {
+  readReqBody(req, LB_VK_MAX_BODY)
+    .then((raw) => {
+      if (!VK_PROTECTED_KEY) {
+        lbSendJson(res, 503, { error: "leaderboard_disabled", message: "Set VK_PROTECTED_KEY" });
+        return;
+      }
+      let body;
+      try {
+        body = JSON.parse(raw || "{}");
+      } catch {
+        lbSendJson(res, 400, { error: "bad_json" });
+        return;
+      }
+      const params = body.params;
+      if (!params || typeof params !== "object") {
+        lbSendJson(res, 400, { error: "missing_params" });
+        return;
+      }
+      if (!verifyVkLaunchSign(params, VK_PROTECTED_KEY)) {
+        lbSendJson(res, 403, { error: "bad_sign" });
+        return;
+      }
+      const uid = String(params.vk_user_id || "").trim();
+      if (!uid) {
+        lbSendJson(res, 400, { error: "missing_vk_user_id" });
+        return;
+      }
+      const now = Date.now();
+      const last = lbSubmitLast.get(uid) || 0;
+      if (now - last < 1500) {
+        lbSendJson(res, 429, { error: "rate_limit" });
+        return;
+      }
+      lbSubmitLast.set(uid, now);
+      if (!lbVkData.users) lbVkData.users = {};
+      const prev = lbVkData.users[uid] || { wins: 0, name: "", avatar: "" };
+      const wins = Math.max(0, Math.floor(Number(prev.wins) || 0)) + 1;
+      const name = typeof body.name === "string" ? body.name.slice(0, 120) : prev.name;
+      const photo =
+        typeof body.photo === "string" && /^https?:\/\//i.test(body.photo)
+          ? body.photo.slice(0, 512)
+          : prev.avatar;
+      lbVkData.users[uid] = {
+        wins,
+        name: name || prev.name || "Player",
+        avatar: photo || prev.avatar || "",
+        updated: now
+      };
+      saveLbVkFile();
+      lbSendJson(res, 200, { ok: true, wins });
+    })
+    .catch((err) => {
+      if (err && err.message === "too_large") lbSendJson(res, 413, { error: "payload_too_large" });
+      else lbSendJson(res, 500, { error: "server" });
+    });
+}
+
+const server = http.createServer((req, res) => {
+  let pathname;
+  try {
+    pathname = new URL(req.url || "/", "http://127.0.0.1").pathname;
+  } catch {
+    pathname = "/";
+  }
+
+  if (pathname === LB_VK_PATH) {
+    if (req.method === "OPTIONS") {
+      lbCorsPreflight(res);
+      return;
+    }
+    if (req.method === "GET") {
+      let lim = 30;
+      try {
+        const sp = new URL(req.url || "/", "http://127.0.0.1").searchParams.get("limit");
+        const n = parseInt(sp, 10);
+        if (!Number.isNaN(n)) lim = Math.min(100, Math.max(1, n));
+      } catch {
+        /* keep default */
+      }
+      handleLbVkGet(res, lim);
+      return;
+    }
+    if (req.method === "POST") {
+      handleLbVkPost(req, res);
+      return;
+    }
+    lbSendJson(res, 405, { error: "method" });
+    return;
+  }
+
+  if (req.method !== "GET") {
+    res.writeHead(405);
+    res.end();
+    return;
+  }
+
+  const urlPath = pathname;
   let filePath;
   if (urlPath === "/" || urlPath === "/index.html") filePath = indexPath;
   else filePath = path.join(staticBase, urlPath);
 
   const resolved = path.resolve(filePath);
-  if (!resolved.startsWith(path.resolve(staticBase))) { res.writeHead(403); res.end(); return; }
+  if (!resolved.startsWith(path.resolve(staticBase))) {
+    res.writeHead(403);
+    res.end();
+    return;
+  }
 
   const ext = path.extname(resolved).toLowerCase();
   const contentType = MIME[ext] || "application/octet-stream";
 
   fs.readFile(resolved, (err, data) => {
-    if (err) { res.writeHead(404); res.end("Not found"); return; }
+    if (err) {
+      res.writeHead(404);
+      res.end("Not found");
+      return;
+    }
     res.writeHead(200, {
       "Content-Type": contentType + "; charset=utf-8",
       "Access-Control-Allow-Origin": "*"

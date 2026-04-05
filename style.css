@@ -1034,24 +1034,6 @@ body.welcome-active {
 .online-modal-card .online-status {
   color: var(--on-navy-soft);
 }
-.online-server-hint {
-  margin: -4px 0 14px;
-  padding: 12px 14px;
-  text-align: left;
-  font-size: 0.74rem;
-  font-weight: 600;
-  line-height: 1.45;
-  color: #8a5a2b;
-  background: rgba(255, 252, 245, 0.98);
-  border: 1px dashed rgba(212, 165, 116, 0.8);
-  border-radius: var(--on-radius, 14px);
-  max-height: min(28vh, 200px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.online-server-hint[hidden] {
-  display: none !important;
-}
 .online-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -922,14 +922,79 @@
       skin_space: { name: t("skinSpace"), desc: t("skinSpaceDesc") }
     };
     catalog.forEach(function (product) {
+      var cp = G.getCoinPackById && G.getCoinPackById(product.id);
       var d = descs[product.id];
-      if (!d && G.getCoinPackById && G.getCoinPackById(product.id)) {
-        var cp = G.getCoinPackById(product.id);
+      if (!d && cp) {
         d = { name: t("coinPackName").replace("{n}", String(cp.coins)), desc: t("coinPackDesc") };
       }
       d = d || { name: product.title, desc: product.description };
       var permOwned = (product.id === "disable_ads" && !G.showAds) || G.ownedSkins.indexOf(product.id) !== -1;
       var div = document.createElement("div");
+
+      if (cp && !permOwned) {
+        div.className = "shop-item shop-item--coin-pack";
+        var visual = document.createElement("div");
+        visual.className = "shop-item-coin-visual";
+        visual.setAttribute("aria-hidden", "true");
+        for (var cx = 1; cx <= 3; cx++) {
+          var coinEl = document.createElement("span");
+          coinEl.className = "shop-item-coin-pile shop-item-coin-pile--" + cx;
+          visual.appendChild(coinEl);
+        }
+        var infoPack = document.createElement("div");
+        infoPack.className = "shop-item-info shop-item-info--pack";
+        var namePack = document.createElement("div");
+        namePack.className = "shop-item-name shop-item-name--pack";
+        namePack.textContent = d.name;
+        var descPack = document.createElement("div");
+        descPack.className = "shop-item-desc shop-item-desc--pack";
+        descPack.textContent = d.desc;
+        infoPack.appendChild(namePack);
+        infoPack.appendChild(descPack);
+
+        var offer = document.createElement("div");
+        offer.className = "shop-item-offer";
+        var offerHead = document.createElement("div");
+        offerHead.className = "shop-item-offer-head";
+        if (cp.discountPct > 0) {
+          var badge = document.createElement("span");
+          badge.className = "shop-item-discount-badge";
+          badge.textContent = "\u2212" + cp.discountPct + "%";
+          offerHead.appendChild(badge);
+        }
+        var votesLine = document.createElement("div");
+        votesLine.className = "shop-item-votes-line";
+        votesLine.textContent = G.donateVotesLabel
+          ? G.donateVotesLabel(cp.votes)
+          : String(cp.votes) + "\u00a0" + t("donateVotesPlural");
+        var baseVotes = cp.coins * (G.COIN_PACK_VOTES_PER_COIN_BASE || 2);
+        var compareEl = document.createElement("div");
+        compareEl.className = "shop-item-compare";
+        compareEl.textContent = t("coinPackPriceNote").replace("{base}", String(baseVotes));
+        offer.appendChild(offerHead);
+        offer.appendChild(votesLine);
+        offer.appendChild(compareEl);
+
+        var packActions = document.createElement("div");
+        packActions.className = "shop-item-pack-actions";
+        var btnPack = document.createElement("button");
+        btnPack.type = "button";
+        btnPack.className = "btn btn-tiny shop-item-pack-buy";
+        btnPack.textContent = t("buy");
+        btnPack.dataset.productId = product.id;
+        btnPack.addEventListener("click", function () {
+          if (G.purchaseShopItem) G.purchaseShopItem(product.id);
+        });
+        packActions.appendChild(btnPack);
+
+        div.appendChild(visual);
+        div.appendChild(infoPack);
+        div.appendChild(offer);
+        div.appendChild(packActions);
+        shopItems.appendChild(div);
+        return;
+      }
+
       div.className = "shop-item" + (permOwned ? " owned" : "");
       var infoDiv = document.createElement("div"); infoDiv.className = "shop-item-info";
       var nameEl = document.createElement("div"); nameEl.className = "shop-item-name"; nameEl.textContent = d.name;

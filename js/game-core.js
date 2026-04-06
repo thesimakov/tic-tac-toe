@@ -106,7 +106,7 @@ window.Game = window.Game || {};
       donateVkOnlyHintText: "Оплата голосами доступна в приложении ВКонтакте.",
       donateCloseAria: "Закрыть окно доната",
       donateBridgeFail: "Не удалось открыть форму оплаты. Попробуйте позже.",
-      shopCoinVoteRate: "Скины и отключение рекламы: 1 монета = 1 голосу. Пакеты монет: база 5 ≈ 10 голосов; больше монет — ниже цена.",
+      shopCoinVoteRate: "Скины и отключение рекламы: 1 монета = 1 голосу. Пакеты монет: база 15 монет за 1 голос; крупные пакеты выгоднее.",
       coinPackName: "{n} монет",
       coinPackDesc: "Пополнение баланса. Оплата голосами ВК или через каталог Яндекс Игр.",
       coinPackPayDescription: "Покупка {n} монет",
@@ -219,7 +219,7 @@ window.Game = window.Game || {};
       donatePayDescription: "Donation to support the game",
       donateCloseAria: "Close donation dialog",
       donateBridgeFail: "Could not open the payment form. Try again later.",
-      shopCoinVoteRate: "Skins & no-ads: 1 coin = 1 vote. Coin packs: base 5 ≈ 10 votes; larger packs cost less per coin.",
+      shopCoinVoteRate: "Skins & no-ads: 1 coin = 1 vote. Coin packs: base 15 coins per vote; larger packs cost less per coin.",
       coinPackName: "{n} coins",
       coinPackDesc: "Top up your balance. Pay with VK votes or via Yandex Games catalog.",
       coinPackPayDescription: "Purchase {n} coins",
@@ -350,18 +350,30 @@ window.Game = window.Game || {};
 
   var SHOP_DAY_MS = 86400000;
 
-  /** Базовый курс для паков монет: 5 монет = 10 голосов (2 голоса за 1 монету до скидки). */
-  G.COIN_PACK_VOTES_PER_COIN_BASE = 2;
-
   /**
-   * Пакеты монет за голоса: скидка растёт с размером (меньше голосов за монету).
-   * votes = round(coins * BASE * (1 - discount)).
+   * Базовая цена пака без скидки: ⌈монеты / 15⌉ голосов (15 монет = 1 голос).
+   * Скидка в UI: округление (base − votes) / base в процентах.
    */
+  G.coinPackBaselineVotes = function (coins) {
+    var c = Math.floor(Number(coins) || 0);
+    if (c < 1) c = 1;
+    return Math.ceil(c / 15);
+  };
+
+  G.coinPackDiscountPct = function (coins, votes) {
+    var base = G.coinPackBaselineVotes(coins);
+    var v = Math.floor(Number(votes) || 0);
+    if (base < 1 || v >= base) return 0;
+    return Math.max(0, Math.min(99, Math.round(100 * (base - v) / base)));
+  };
+
   G.shopCoinPacks = [
-    { id: "coins_10", coins: 10, votes: 19, discountPct: 5 },
-    { id: "coins_50", coins: 50, votes: 88, discountPct: 12 },
-    { id: "coins_100", coins: 100, votes: 164, discountPct: 18 },
-    { id: "coins_250", coins: 250, votes: 375, discountPct: 25 }
+    { id: "coins_15", coins: 15, votes: 1 },
+    { id: "coins_50", coins: 50, votes: 3 },
+    { id: "coins_150", coins: 150, votes: 9 },
+    { id: "coins_500", coins: 500, votes: 30 },
+    { id: "coins_1000", coins: 1000, votes: 50 },
+    { id: "coins_5000", coins: 5000, votes: 270 }
   ];
 
   /** Цены в монетах внутриигровые (1 монета = 1 голосу для скинов). Темы — аренда на сутки. */
@@ -540,6 +552,15 @@ window.Game = window.Game || {};
 
   G.donateVotesLabel = function (n) {
     var v = Math.floor(Number(n));
+    if (!Number.isFinite(v)) v = 0;
+    v = Math.abs(v);
+    if (G.lang === "ru") {
+      var m10 = v % 10;
+      var m100 = v % 100;
+      if (m10 === 1 && m100 !== 11) return String(v) + "\u00a0голос";
+      if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return String(v) + "\u00a0голоса";
+      return String(v) + "\u00a0голосов";
+    }
     if (v === 1) return G.t("donateVoteOne");
     return String(v) + "\u00a0" + G.t("donateVotesPlural");
   };

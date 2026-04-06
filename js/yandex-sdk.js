@@ -40,12 +40,13 @@
   }
 
   function coinPackSyntheticProduct(pack) {
-    var base = pack.coins * (G.COIN_PACK_VOTES_PER_COIN_BASE || 2);
+    var base = G.coinPackBaselineVotes ? G.coinPackBaselineVotes(pack.coins) : Math.ceil(pack.coins / 15);
+    var disc = G.coinPackDiscountPct ? G.coinPackDiscountPct(pack.coins, pack.votes) : 0;
     var voteLbl = G.donateVotesLabel ? G.donateVotesLabel(pack.votes) : String(pack.votes) + "\u00a0" + G.t("donateVotesPlural");
     var pv = voteLbl;
-    if (pack.discountPct > 0) {
-      pv += " \u2212" + pack.discountPct + "%";
-      pv += " · " + G.t("coinPackPriceNote").replace("{base}", String(base));
+    if (disc > 0) {
+      pv += " \u2212" + disc + "%";
+      pv += " · " + G.t("coinPackPriceNote").replace("{base}", G.donateVotesLabel ? G.donateVotesLabel(base) : String(base));
     }
     return {
       id: pack.id,

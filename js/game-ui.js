@@ -956,10 +956,11 @@
         offer.className = "shop-item-offer";
         var offerHead = document.createElement("div");
         offerHead.className = "shop-item-offer-head";
-        if (cp.discountPct > 0) {
+        var discPct = G.coinPackDiscountPct ? G.coinPackDiscountPct(cp.coins, cp.votes) : 0;
+        if (discPct > 0) {
           var badge = document.createElement("span");
           badge.className = "shop-item-discount-badge";
-          badge.textContent = "\u2212" + cp.discountPct + "%";
+          badge.textContent = "\u2212" + discPct + "%";
           offerHead.appendChild(badge);
         }
         var votesLine = document.createElement("div");
@@ -967,10 +968,13 @@
         votesLine.textContent = G.donateVotesLabel
           ? G.donateVotesLabel(cp.votes)
           : String(cp.votes) + "\u00a0" + t("donateVotesPlural");
-        var baseVotes = cp.coins * (G.COIN_PACK_VOTES_PER_COIN_BASE || 2);
+        var baseVotes = G.coinPackBaselineVotes ? G.coinPackBaselineVotes(cp.coins) : Math.ceil(cp.coins / 15);
         var compareEl = document.createElement("div");
         compareEl.className = "shop-item-compare";
-        compareEl.textContent = t("coinPackPriceNote").replace("{base}", String(baseVotes));
+        compareEl.textContent = t("coinPackPriceNote").replace(
+          "{base}",
+          G.donateVotesLabel ? G.donateVotesLabel(baseVotes) : String(baseVotes)
+        );
         offer.appendChild(offerHead);
         offer.appendChild(votesLine);
         offer.appendChild(compareEl);

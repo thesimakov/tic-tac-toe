@@ -135,12 +135,13 @@
   }
 
   function coinPackCatalogRow(p) {
-    var base = p.coins * (G.COIN_PACK_VOTES_PER_COIN_BASE || 2);
+    var base = G.coinPackBaselineVotes ? G.coinPackBaselineVotes(p.coins) : Math.ceil(p.coins / 15);
+    var disc = G.coinPackDiscountPct ? G.coinPackDiscountPct(p.coins, p.votes) : 0;
     var voteLbl = G.donateVotesLabel ? G.donateVotesLabel(p.votes) : String(p.votes) + "\u00a0" + G.t("donateVotesPlural");
     var pv = voteLbl;
-    if (p.discountPct > 0) {
-      pv += " \u2212" + p.discountPct + "%";
-      pv += " · " + G.t("coinPackPriceNote").replace("{base}", String(base));
+    if (disc > 0) {
+      pv += " \u2212" + disc + "%";
+      pv += " · " + G.t("coinPackPriceNote").replace("{base}", G.donateVotesLabel ? G.donateVotesLabel(base) : String(base));
     }
     return {
       id: p.id,

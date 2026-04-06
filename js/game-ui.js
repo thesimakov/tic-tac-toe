@@ -922,7 +922,12 @@
       skin_space: { name: t("skinSpace"), desc: t("skinSpaceDesc") }
     };
     catalog.forEach(function (product) {
-      var d = descs[product.id] || { name: product.title, desc: product.description };
+      var d = descs[product.id];
+      if (!d && G.getCoinPackById && G.getCoinPackById(product.id)) {
+        var cp = G.getCoinPackById(product.id);
+        d = { name: t("coinPackName").replace("{n}", String(cp.coins)), desc: t("coinPackDesc") };
+      }
+      d = d || { name: product.title, desc: product.description };
       var permOwned = (product.id === "disable_ads" && !G.showAds) || G.ownedSkins.indexOf(product.id) !== -1;
       var div = document.createElement("div");
       div.className = "shop-item" + (permOwned ? " owned" : "");

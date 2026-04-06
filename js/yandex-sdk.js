@@ -31,15 +31,48 @@
         } else if (p.productID.startsWith("skin_")) {
           if (G.ownedSkins.indexOf(p.productID) === -1) G.ownedSkins.push(p.productID);
           payments.consumePurchase(p.purchaseToken);
+        } else if (p.productID.indexOf("coins_") === 0 && G.getCoinPackById && G.getCoinPackById(p.productID)) {
+          G.grantCoinPack(p.productID);
+          payments.consumePurchase(p.purchaseToken);
         }
       });
     }).catch(function () {});
   }
 
+  function coinPackSyntheticProduct(pack) {
+    var base = pack.coins * (G.COIN_PACK_VOTES_PER_COIN_BASE || 2);
+    var voteLbl = G.donateVotesLabel ? G.donateVotesLabel(pack.votes) : String(pack.votes) + "\u00a0" + G.t("donateVotesPlural");
+    var pv = voteLbl;
+    if (pack.discountPct > 0) {
+      pv += " \u2212" + pack.discountPct + "%";
+      pv += " · " + G.t("coinPackPriceNote").replace("{base}", String(base));
+    }
+    return {
+      id: pack.id,
+      title: G.t("coinPackName").replace("{n}", String(pack.coins)),
+      description: G.t("coinPackDesc"),
+      priceValue: pv,
+      price: ""
+    };
+  }
+
+  function mergeCoinPacksCatalog(products) {
+    var list = (products || []).slice();
+    var have = {};
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && list[i].id) have[list[i].id] = true;
+    }
+    var packs = G.shopCoinPacks || [];
+    for (var j = 0; j < packs.length; j++) {
+      if (!have[packs[j].id]) list.push(coinPackSyntheticProduct(packs[j]));
+    }
+    return list;
+  }
+
   function loadCatalog(payments) {
     payments.getCatalog().then(function (products) {
-      catalogCache = products;
-      G.renderShopItems(products);
+      catalogCache = mergeCoinPacksCatalog(products);
+      G.renderShopItems(catalogCache);
     }).catch(function () {});
   }
 
@@ -51,6 +84,9 @@
       } else if (productId.startsWith("skin_")) {
         if (G.ownedSkins.indexOf(productId) === -1) G.ownedSkins.push(productId);
         G.applySkin(productId);
+        G.payments.consumePurchase(purchase.purchaseToken);
+      } else if (productId.indexOf("coins_") === 0 && G.getCoinPackById && G.getCoinPackById(productId)) {
+        G.grantCoinPack(productId);
         G.payments.consumePurchase(purchase.purchaseToken);
       }
       if (catalogCache) G.renderShopItems(catalogCache);

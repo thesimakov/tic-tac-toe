@@ -134,12 +134,34 @@
     return { id: id, title: G.t(titleKey), description: G.t(descKey), priceValue: pv, price: "" };
   }
 
+  function coinPackCatalogRow(p) {
+    var base = p.coins * (G.COIN_PACK_VOTES_PER_COIN_BASE || 2);
+    var voteLbl = G.donateVotesLabel ? G.donateVotesLabel(p.votes) : String(p.votes) + "\u00a0" + G.t("donateVotesPlural");
+    var pv = voteLbl;
+    if (p.discountPct > 0) {
+      pv += " \u2212" + p.discountPct + "%";
+      pv += " · " + G.t("coinPackPriceNote").replace("{base}", String(base));
+    }
+    return {
+      id: p.id,
+      title: G.t("coinPackName").replace("{n}", String(p.coins)),
+      description: G.t("coinPackDesc"),
+      priceValue: pv,
+      price: ""
+    };
+  }
+
   function staticCatalog() {
-    return [
+    var rows = [
       staticCatalogRow("disable_ads", "disableAds", "disableAdsDesc"),
       staticCatalogRow("skin_wood", "skinWood", "skinWoodDesc"),
       staticCatalogRow("skin_space", "skinSpace", "skinSpaceDesc")
     ];
+    var packs = G.shopCoinPacks || [];
+    for (var i = 0; i < packs.length; i++) {
+      rows.push(coinPackCatalogRow(packs[i]));
+    }
+    return rows;
   }
 
   function showVkUser(player) {
@@ -338,11 +360,44 @@
           } else if (String(productId).indexOf("skin_") === 0) {
             if (G.ownedSkins.indexOf(productId) === -1) G.ownedSkins.push(productId);
             if (G.applySkin) G.applySkin(productId);
+          } else if (String(productId).indexOf("coins_") === 0 && G.grantCoinPack) {
+            G.grantCoinPack(productId);
           }
           if (catalogCache && G.renderShopItems) G.renderShopItems(catalogCache);
           G.saveCloud();
         })
         .catch(function () {});
+    };
+
+    G.openCoinPackPayVk = function (packId) {
+      var pack = G.getCoinPackById ? G.getCoinPackById(packId) : null;
+      if (!pack) return;
+      var b = getBridge();
+      if (!b) {
+        if (G.showShopFlash) G.showShopFlash(G.t("donateVkOnlyHintText"));
+        return;
+      }
+      var desc = G.t("coinPackPayDescription").replace("{n}", String(pack.coins));
+      var groupId = getDonateGroupIdFromMeta();
+
+      resolveVkAppId(function (appId) {
+        if (!appId) {
+          if (G.showShopFlash) G.showShopFlash(G.t("donateVkOnlyHintText"));
+          return;
+        }
+        var payload = groupId
+          ? { app_id: appId, action: "pay-to-group", params: { group_id: groupId, amount: pack.votes, description: desc } }
+          : { app_id: appId, action: "pay-to-service", params: { amount: pack.votes, description: desc } };
+
+        b.send("VKWebAppOpenPayForm", payload)
+          .then(function () {
+            if (G.grantCoinPack) G.grantCoinPack(packId);
+            if (G.closeShop) G.closeShop();
+          })
+          .catch(function () {
+            if (G.showShopFlash) G.showShopFlash(G.t("donateBridgeFail"));
+          });
+      });
     };
 
     G.submitScore = function (opts) {

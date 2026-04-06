@@ -106,7 +106,11 @@ window.Game = window.Game || {};
       donateVkOnlyHintText: "Оплата голосами доступна в приложении ВКонтакте.",
       donateCloseAria: "Закрыть окно доната",
       donateBridgeFail: "Не удалось открыть форму оплаты. Попробуйте позже.",
-      shopCoinVoteRate: "1 монета = 1 голосу",
+      shopCoinVoteRate: "Скины и отключение рекламы: 1 монета = 1 голосу. Пакеты монет: база 5 ≈ 10 голосов; больше монет — ниже цена.",
+      coinPackName: "{n} монет",
+      coinPackDesc: "Пополнение баланса. Оплата голосами ВК или через каталог Яндекс Игр.",
+      coinPackPayDescription: "Покупка {n} монет",
+      coinPackPriceNote: "вместо {base} при базе без скидки",
       shopCoinsShort: "монет",
       shopPerDaySuffix: "(сутки)",
       shopNotEnoughCoins: "Недостаточно монет.",
@@ -215,7 +219,11 @@ window.Game = window.Game || {};
       donatePayDescription: "Donation to support the game",
       donateCloseAria: "Close donation dialog",
       donateBridgeFail: "Could not open the payment form. Try again later.",
-      shopCoinVoteRate: "1 coin = 1 vote",
+      shopCoinVoteRate: "Skins & no-ads: 1 coin = 1 vote. Coin packs: base 5 ≈ 10 votes; larger packs cost less per coin.",
+      coinPackName: "{n} coins",
+      coinPackDesc: "Top up your balance. Pay with VK votes or via Yandex Games catalog.",
+      coinPackPayDescription: "Purchase {n} coins",
+      coinPackPriceNote: "instead of {base} at base rate",
       shopCoinsShort: "coins",
       shopPerDaySuffix: "(per day)",
       shopNotEnoughCoins: "Not enough coins.",
@@ -342,11 +350,44 @@ window.Game = window.Game || {};
 
   var SHOP_DAY_MS = 86400000;
 
-  /** Цены в монетах (1 монета = 1 голосу). Темы — аренда на сутки. */
+  /** Базовый курс для паков монет: 5 монет = 10 голосов (2 голоса за 1 монету до скидки). */
+  G.COIN_PACK_VOTES_PER_COIN_BASE = 2;
+
+  /**
+   * Пакеты монет за голоса: скидка растёт с размером (меньше голосов за монету).
+   * votes = round(coins * BASE * (1 - discount)).
+   */
+  G.shopCoinPacks = [
+    { id: "coins_10", coins: 10, votes: 19, discountPct: 5 },
+    { id: "coins_50", coins: 50, votes: 88, discountPct: 12 },
+    { id: "coins_100", coins: 100, votes: 164, discountPct: 18 },
+    { id: "coins_250", coins: 250, votes: 375, discountPct: 25 }
+  ];
+
+  /** Цены в монетах внутриигровые (1 монета = 1 голосу для скинов). Темы — аренда на сутки. */
   G.shopCoinPrices = {
     disable_ads: { coins: 14, perDay: false },
     skin_wood: { coins: 5, perDay: true },
     skin_space: { coins: 10, perDay: true }
+  };
+
+  G.getCoinPackById = function (id) {
+    var packs = G.shopCoinPacks;
+    if (!packs || !id) return null;
+    for (var i = 0; i < packs.length; i++) {
+      if (packs[i].id === id) return packs[i];
+    }
+    return null;
+  };
+
+  G.grantCoinPack = function (packId) {
+    var p = G.getCoinPackById(packId);
+    if (!p) return;
+    G.coins = Math.max(0, Math.floor(G.coins + p.coins));
+    if (G.updateCoinsUI) G.updateCoinsUI();
+    if (G.saveCloud) G.saveCloud();
+    if (G.showShopFlash) G.showShopFlash(G.t("shopPurchaseOk"));
+    if (G.renderShopItems && G._shopCatalogLast) G.renderShopItems(G._shopCatalogLast);
   };
 
   G.isShopProductOwned = function (id) {
@@ -367,6 +408,18 @@ window.Game = window.Game || {};
   };
 
   G.purchaseShopItem = function (productId) {
+    if (G.getCoinPackById && G.getCoinPackById(productId)) {
+      if (G.openCoinPackPayVk) {
+        G.openCoinPackPayVk(productId);
+        return;
+      }
+      if (G.doPurchase) {
+        G.doPurchase(productId);
+        return;
+      }
+      if (G.showShopFlash) G.showShopFlash(G.t("donateVkOnlyHintText"));
+      return;
+    }
     if (productId === "disable_ads" && G.showAds === false) return;
     if (String(productId).indexOf("skin_") === 0 && G.ownedSkins.indexOf(productId) !== -1) return;
     var spec = G.shopCoinPrices && G.shopCoinPrices[productId];

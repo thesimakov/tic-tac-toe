@@ -265,7 +265,7 @@
     if (adNoticeOkBtn) adNoticeOkBtn.textContent = G.t("adNoticeOk");
     resetAdNoticePaySection();
     var selOpen = $("adNoticeNoAdsPlan");
-    if (selOpen && selOpen.value !== "year") selOpen.value = "week";
+    if (selOpen && selOpen.value !== "month") selOpen.value = "week";
     syncAdNoticePayControls();
     if (adNoticeModal) adNoticeModal.classList.add("show");
   };
@@ -1100,7 +1100,7 @@
   });
   if ($("adNoticePayBtn")) $("adNoticePayBtn").addEventListener("click", function () {
     var sel = $("adNoticeNoAdsPlan");
-    var plan = sel && sel.value === "year" ? "year" : "week";
+    var plan = sel && sel.value === "month" ? "month" : "week";
     if (G.openVkPayNoAds) G.openVkPayNoAds(plan);
   });
   if (adNoticeModal) adNoticeModal.addEventListener("click", function (e) { if (e.target === adNoticeModal) G.closeAdNoticeModal(); });

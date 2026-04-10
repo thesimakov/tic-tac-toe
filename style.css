@@ -1526,7 +1526,7 @@ body.welcome-active {
 /* ---- магазин: карточки пакетов монет ---- */
 .shop-item--coin-pack {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) minmax(110px, 34%) auto;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px 14px;
   padding: 14px 16px;
@@ -1594,22 +1594,19 @@ body.welcome-active {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.shop-item-offer {
-  min-width: 0;
+.shop-item-pack-pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   text-align: right;
-  padding: 8px 11px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(138, 190, 248, 0.32);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  gap: 5px;
+  min-width: 0;
 }
-.shop-item-offer-head {
+.shop-item-pack-pricing-head {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 6px;
-  min-height: 0;
 }
 .shop-item-discount-badge {
   display: inline-flex;
@@ -1635,7 +1632,6 @@ body.welcome-active {
   line-height: 1.28;
 }
 .shop-item-compare {
-  margin-top: 5px;
   font-size: 0.68rem;
   font-weight: 600;
   color: rgba(52, 65, 101, 0.52);
@@ -1643,8 +1639,10 @@ body.welcome-active {
 }
 .shop-item-pack-actions {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
 }
 .shop-item--coin-pack .shop-item-pack-buy {
   min-width: 90px;
@@ -1669,21 +1667,22 @@ body.welcome-active {
 @media (max-width: 400px) {
   .shop-item--coin-pack {
     grid-template-columns: 48px 1fr;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto auto;
     gap: 10px 12px;
     padding: 12px 14px;
   }
   .shop-item-coin-visual { width: 48px; height: 48px; }
   .shop-item-info--pack { grid-column: 2; grid-row: 1; }
-  .shop-item-offer {
-    grid-column: 1 / -1;
-    text-align: left;
-  }
-  .shop-item-offer-head { justify-content: flex-start; }
   .shop-item-pack-actions {
     grid-column: 1 / -1;
-    justify-content: stretch;
+    grid-row: 2;
+    align-items: stretch;
   }
+  .shop-item-pack-pricing {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .shop-item-pack-pricing-head { justify-content: flex-start; }
   .shop-item-pack-buy { width: 100%; }
 }
 
@@ -2623,11 +2622,6 @@ html:has(body.theme-neon) {
 }
 .theme-space .shop-item-desc--pack {
   color: var(--ink-soft);
-}
-.theme-space .shop-item-offer {
-  background: rgba(8, 12, 32, 0.55);
-  border-color: rgba(100, 160, 255, 0.22);
-  box-shadow: inset 0 0 20px rgba(92, 225, 255, 0.04);
 }
 .theme-space .shop-item-votes-line {
   color: #e8f4ff;

@@ -13,8 +13,8 @@
   <!-- Для доната голосами сообществу: числовой id группы VK (без минуса). Пусто — форма pay-to-service приложения. -->
   <meta name="vk-donate-group-id" content="">
   <!-- Суммы в голосах для VKWebAppOpenPayForm («отключить рекламу» в модалке перед рекламой). Подстройте под курс и кабинет ВК. -->
-  <meta name="vk-ads-week-votes" content="100">
-  <meta name="vk-ads-year-votes" content="1500">
+  <meta name="vk-ads-week-votes" content="2">
+  <meta name="vk-ads-month-votes" content="5">
   <!-- Баннер ВК: тестовые объявления включаются в настройках приложения (Мини-приложения → монетизация / реклама). До модерации показ возможен в режиме тестирования от имени администраторов приложения. -->
   <!-- WebSocket для онлайна (необязательно). Пустой content = берётся адрес из js/game-online.js. Пример: content="wss://ваш-сервис.onrender.com" -->
   <meta name="game-ws-url" content="">
@@ -203,7 +203,7 @@
         <div id="adNoticePayExpand" class="ad-notice-pay-expand" hidden>
           <select id="adNoticeNoAdsPlan" class="ad-notice-plan-select" aria-label="">
             <option value="week"></option>
-            <option value="year"></option>
+            <option value="month"></option>
           </select>
           <button type="button" class="btn accent ad-notice-pay-submit" id="adNoticePayBtn"></button>
           <p class="donate-modal-hint donate-modal-hint--vk ad-notice-pay-hint" id="adNoticePayHint" hidden></p>

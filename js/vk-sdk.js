@@ -508,7 +508,7 @@
     }
 
     var ADS_FREE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-    var ADS_FREE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+    var ADS_FREE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 
     G.openVkPayNoAds = function (plan) {
       var b = getBridge();
@@ -529,12 +529,15 @@
           }
           return;
         }
-        var isYear = plan === "year";
-        var votes = isYear
-          ? readMetaVotes("vk-ads-year-votes", typeof G.VK_ADS_YEAR_VOTES === "number" ? G.VK_ADS_YEAR_VOTES : 1500)
-          : readMetaVotes("vk-ads-week-votes", typeof G.VK_ADS_WEEK_VOTES === "number" ? G.VK_ADS_WEEK_VOTES : 100);
-        var desc = isYear ? G.t("adPayYearDesc") : G.t("adPayWeekDesc");
-        var duration = isYear ? ADS_FREE_YEAR_MS : ADS_FREE_WEEK_MS;
+        var isMonth = plan === "month";
+        var votes = isMonth
+          ? readMetaVotes(
+            "vk-ads-month-votes",
+            readMetaVotes("vk-ads-year-votes", typeof G.VK_ADS_YEAR_VOTES === "number" ? G.VK_ADS_YEAR_VOTES : 5)
+          )
+          : readMetaVotes("vk-ads-week-votes", typeof G.VK_ADS_WEEK_VOTES === "number" ? G.VK_ADS_WEEK_VOTES : 2);
+        var desc = isMonth ? G.t("adPayYearDesc") : G.t("adPayWeekDesc");
+        var duration = isMonth ? ADS_FREE_MONTH_MS : ADS_FREE_WEEK_MS;
         var groupId = getDonateGroupIdFromMeta();
         var payload = groupId
           ? { app_id: appId, action: "pay-to-group", params: { group_id: groupId, amount: votes, description: desc } }

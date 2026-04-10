@@ -39,7 +39,7 @@
     if (sel) {
       sel.setAttribute("aria-label", tf("adPayPlanAria"));
       var ow = sel.querySelector('option[value="week"]');
-      var oy = sel.querySelector('option[value="year"]');
+      var oy = sel.querySelector('option[value="month"]');
       if (ow) ow.textContent = tf("adPayWeekBtn");
       if (oy) oy.textContent = tf("adPayYearBtn");
     }
@@ -946,41 +946,39 @@
         var namePack = document.createElement("div");
         namePack.className = "shop-item-name shop-item-name--pack";
         namePack.textContent = d.name;
-        var descPack = document.createElement("div");
-        descPack.className = "shop-item-desc shop-item-desc--pack";
-        descPack.textContent = d.desc;
         infoPack.appendChild(namePack);
-        infoPack.appendChild(descPack);
 
-        var offer = document.createElement("div");
-        offer.className = "shop-item-offer";
-        var offerHead = document.createElement("div");
-        offerHead.className = "shop-item-offer-head";
         var discPct = G.coinPackDiscountPct ? G.coinPackDiscountPct(cp.coins, cp.votes) : 0;
-        if (discPct > 0) {
-          var badge = document.createElement("span");
-          badge.className = "shop-item-discount-badge";
-          badge.textContent = "\u2212" + discPct + "%";
-          offerHead.appendChild(badge);
-        }
         var votesLine = document.createElement("div");
         votesLine.className = "shop-item-votes-line";
         votesLine.textContent = G.donateVotesLabel
           ? G.donateVotesLabel(cp.votes)
           : String(cp.votes) + "\u00a0" + t("donateVotesPlural");
-        var baseVotes = G.coinPackBaselineVotes ? G.coinPackBaselineVotes(cp.coins) : Math.ceil(cp.coins / 15);
-        var compareEl = document.createElement("div");
-        compareEl.className = "shop-item-compare";
-        compareEl.textContent = t("coinPackPriceNote").replace(
-          "{base}",
-          G.donateVotesLabel ? G.donateVotesLabel(baseVotes) : String(baseVotes)
-        );
-        offer.appendChild(offerHead);
-        offer.appendChild(votesLine);
-        offer.appendChild(compareEl);
-
         var packActions = document.createElement("div");
         packActions.className = "shop-item-pack-actions";
+        var pricingStack = document.createElement("div");
+        pricingStack.className = "shop-item-pack-pricing";
+        if (discPct > 0) {
+          var pricingHead = document.createElement("div");
+          pricingHead.className = "shop-item-pack-pricing-head";
+          var badge = document.createElement("span");
+          badge.className = "shop-item-discount-badge";
+          badge.textContent = "\u2212" + discPct + "%";
+          pricingHead.appendChild(badge);
+          pricingStack.appendChild(pricingHead);
+        }
+        pricingStack.appendChild(votesLine);
+        if (discPct > 0) {
+          var baseVotes = G.coinPackBaselineVotes ? G.coinPackBaselineVotes(cp.coins) : Math.ceil(cp.coins / 15);
+          var compareEl = document.createElement("div");
+          compareEl.className = "shop-item-compare";
+          compareEl.textContent = t("coinPackPriceNote").replace(
+            "{base}",
+            G.donateVotesLabel ? G.donateVotesLabel(baseVotes) : String(baseVotes)
+          );
+          pricingStack.appendChild(compareEl);
+        }
+
         var btnPack = document.createElement("button");
         btnPack.type = "button";
         btnPack.className = "btn btn-tiny shop-item-pack-buy";
@@ -989,11 +987,11 @@
         btnPack.addEventListener("click", function () {
           if (G.purchaseShopItem) G.purchaseShopItem(product.id);
         });
+        packActions.appendChild(pricingStack);
         packActions.appendChild(btnPack);
 
         div.appendChild(visual);
         div.appendChild(infoPack);
-        div.appendChild(offer);
         div.appendChild(packActions);
         shopItems.appendChild(div);
         return;

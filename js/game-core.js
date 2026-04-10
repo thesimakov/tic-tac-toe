@@ -74,10 +74,10 @@ window.Game = window.Game || {};
       adNoAdsOffer: "Отключить рекламу",
       adPayPlanAria: "Период без рекламы",
       adPaySubmit: "Оплатить голосами",
-      adPayWeekBtn: "100 ₽ голосами · неделя",
-      adPayYearBtn: "1500 ₽ голосами · год",
+      adPayWeekBtn: "2 голоса · неделя",
+      adPayYearBtn: "5 голосов · месяц",
       adPayWeekDesc: "Отключение рекламы на 7 дней",
-      adPayYearDesc: "Отключение рекламы на 1 год",
+      adPayYearDesc: "Отключение рекламы на 1 месяц",
       coins: "Монеты",
       langGroupAria: "Язык интерфейса",
       playSideAria: "Сторона и размер поля",
@@ -187,10 +187,10 @@ window.Game = window.Game || {};
       adNoAdsOffer: "Remove ads",
       adPayPlanAria: "Ad-free period",
       adPaySubmit: "Pay with votes",
-      adPayWeekBtn: "100 ₽ in votes · 1 week",
-      adPayYearBtn: "1500 ₽ in votes · 1 year",
+      adPayWeekBtn: "2 votes · 1 week",
+      adPayYearBtn: "5 votes · 1 month",
       adPayWeekDesc: "No ads for 7 days",
-      adPayYearDesc: "No ads for 1 year",
+      adPayYearDesc: "No ads for 1 month",
       coins: "Coins",
       langGroupAria: "Interface language",
       playSideAria: "Side and board size",
@@ -564,9 +564,9 @@ window.Game = window.Game || {};
     if (v === 1) return G.t("donateVoteOne");
     return String(v) + "\u00a0" + G.t("donateVotesPlural");
   };
-  /** Значения по умолчанию; переопределяются meta vk-ads-week-votes / vk-ads-year-votes. */
-  G.VK_ADS_WEEK_VOTES = 100;
-  G.VK_ADS_YEAR_VOTES = 1500;
+  /** Значения по умолчанию; переопределяются meta vk-ads-week-votes / vk-ads-month-votes. */
+  G.VK_ADS_WEEK_VOTES = 2;
+  G.VK_ADS_YEAR_VOTES = 5;
 
   G.isAdsSuppressed = function () {
     if (G.showAds === false) return true;

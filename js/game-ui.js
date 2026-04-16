@@ -918,6 +918,8 @@
     };
     var descs = {
       disable_ads: { name: t("disableAds"), desc: t("disableAdsDesc") },
+      disable_ads_week: { name: t("disableAdsWeek"), desc: t("disableAdsWeekDesc") },
+      disable_ads_month: { name: t("disableAdsMonth"), desc: t("disableAdsMonthDesc") },
       skin_wood: { name: t("skinWood"), desc: t("skinWoodDesc") },
       skin_space: { name: t("skinSpace"), desc: t("skinSpaceDesc") }
     };
@@ -933,6 +935,7 @@
 
       if (cp && !permOwned) {
         div.className = "shop-item shop-item--coin-pack";
+        div.dataset.productId = product.id;
         var visual = document.createElement("div");
         visual.className = "shop-item-coin-visual";
         visual.setAttribute("aria-hidden", "true");
@@ -995,6 +998,72 @@
         div.appendChild(packActions);
         shopItems.appendChild(div);
         return;
+      }
+
+      if ((product.id === "disable_ads_week" || product.id === "disable_ads_month") && !permOwned) {
+        var specAd = G.shopCoinPrices && G.shopCoinPrices[product.id];
+        if (specAd) {
+          div.className = "shop-item shop-item--ad-tier";
+          var infoAd = document.createElement("div");
+          infoAd.className = "shop-item-info";
+          var nameAd = document.createElement("div");
+          nameAd.className = "shop-item-name";
+          nameAd.textContent = d.name;
+          var descAd = document.createElement("div");
+          descAd.className = "shop-item-desc";
+          descAd.textContent = d.desc;
+          infoAd.appendChild(nameAd);
+          infoAd.appendChild(descAd);
+          div.appendChild(infoAd);
+          var sideAd = document.createElement("div");
+          sideAd.className = "shop-item-ad-side";
+          var priceAd = document.createElement("div");
+          priceAd.className = "shop-item-price";
+          var priceSpanAd = document.createElement("span");
+          priceSpanAd.textContent = formatCoinPrice(product.id, product);
+          priceAd.appendChild(priceSpanAd);
+          sideAd.appendChild(priceAd);
+          var actionsAd = document.createElement("div");
+          actionsAd.className = "shop-item-ad-actions";
+          var costAd = specAd.coins;
+          if (G.coins >= costAd) {
+            var btnAd = document.createElement("button");
+            btnAd.type = "button";
+            btnAd.className = "btn btn-tiny";
+            btnAd.textContent = t("buy");
+            btnAd.dataset.productId = product.id;
+            btnAd.addEventListener("click", function () {
+              if (G.purchaseShopItem) G.purchaseShopItem(product.id);
+            });
+            actionsAd.appendChild(btnAd);
+          } else {
+            var topTitle = document.createElement("div");
+            topTitle.className = "shop-item-ad-topup-title";
+            topTitle.textContent = t("shopBuyCoinsTitle");
+            var topRow = document.createElement("div");
+            topRow.className = "shop-item-ad-topup-row";
+            function mkTopBtn(packId, labelKey) {
+              var b = document.createElement("button");
+              b.type = "button";
+              b.className = "btn btn-tiny shop-item-ad-topup-btn";
+              b.textContent = t(labelKey);
+              b.dataset.productId = packId;
+              b.addEventListener("click", function () {
+                if (G.purchaseShopItem) G.purchaseShopItem(packId);
+              });
+              return b;
+            }
+            topRow.appendChild(mkTopBtn("coins_5", "shopBuyCoinsTopUp5"));
+            topRow.appendChild(mkTopBtn("coins_10", "shopBuyCoinsTopUp10"));
+            topRow.appendChild(mkTopBtn("coins_20", "shopBuyCoinsTopUp20"));
+            actionsAd.appendChild(topTitle);
+            actionsAd.appendChild(topRow);
+          }
+          sideAd.appendChild(actionsAd);
+          div.appendChild(sideAd);
+          shopItems.appendChild(div);
+          return;
+        }
       }
 
       div.className = "shop-item" + (permOwned ? " owned" : "");
@@ -1138,6 +1207,16 @@
   if (hintBtn) hintBtn.addEventListener("click", function () {
     if (!(G.isAdsSuppressed && G.isAdsSuppressed()) && G.showRewardedAd) G.showRewardedAd(doHint);
     else doHint();
+  });
+  if (userCoinsWrap) userCoinsWrap.addEventListener("click", function () {
+    if (G.openShop) G.openShop();
+    // прокрутка к быстрым пакам (если уже отрисованы)
+    try {
+      setTimeout(function () {
+        var it = document.querySelector('.shop-item--coin-pack[data-product-id="coins_5"]');
+        if (it && it.scrollIntoView) it.scrollIntoView({ block: "center", behavior: "smooth" });
+      }, 0);
+    } catch (e) {}
   });
   if (shopBtn) shopBtn.addEventListener("click", function () { G.openShop(); });
   if (shopCloseBtn) shopCloseBtn.addEventListener("click", function () { G.closeShop(); });

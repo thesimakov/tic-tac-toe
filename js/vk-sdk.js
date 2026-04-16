@@ -154,7 +154,8 @@
 
   function staticCatalog() {
     var rows = [
-      staticCatalogRow("disable_ads", "disableAds", "disableAdsDesc"),
+      staticCatalogRow("disable_ads_week", "disableAdsWeek", "disableAdsWeekDesc"),
+      staticCatalogRow("disable_ads_month", "disableAdsMonth", "disableAdsMonthDesc"),
       staticCatalogRow("skin_wood", "skinWood", "skinWoodDesc"),
       staticCatalogRow("skin_space", "skinSpace", "skinSpaceDesc")
     ];
@@ -357,6 +358,10 @@
           if (!ok) return;
           if (productId === "disable_ads") {
             G.showAds = false;
+            hideVkBannerAd();
+          } else if (productId === "disable_ads_week" || productId === "disable_ads_month") {
+            var adSpec = G.shopCoinPrices && G.shopCoinPrices[productId];
+            if (adSpec && adSpec.adsFreeMs && G.extendAdsFreePeriod) G.extendAdsFreePeriod(adSpec.adsFreeMs);
             hideVkBannerAd();
           } else if (String(productId).indexOf("skin_") === 0) {
             if (G.ownedSkins.indexOf(productId) === -1) G.ownedSkins.push(productId);

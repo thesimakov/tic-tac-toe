@@ -1522,6 +1522,41 @@ body.welcome-active {
   border-color: var(--shop-gold, #e2d1a6);
   color: var(--shop-navy, #344165);
 }
+.shop-item--ad-tier {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.shop-item-ad-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: min(100%, 200px);
+}
+.shop-item-ad-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 100%;
+}
+.shop-item-ad-topup-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(52, 65, 101, 0.88);
+  letter-spacing: 0.02em;
+}
+.shop-item-ad-topup-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.shop-item-ad-topup-btn {
+  min-width: 0;
+  text-align: center;
+  line-height: 1.2;
+}
 
 /* ---- магазин: карточки пакетов монет ---- */
 .shop-item--coin-pack {
@@ -2605,6 +2640,9 @@ html:has(body.theme-neon) {
 .theme-space .shop-item {
   background: linear-gradient(180deg, rgba(30, 34, 68, 0.6) 0%, rgba(16, 18, 42, 0.75) 100%);
   border-color: rgba(120, 180, 255, 0.22);
+}
+.theme-space .shop-item-ad-topup-title {
+  color: rgba(200, 220, 255, 0.9);
 }
 
 .theme-space .shop-item--coin-pack {

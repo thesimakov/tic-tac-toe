@@ -28,6 +28,10 @@
       purchases.forEach(function (p) {
         if (p.productID === "disable_ads") {
           G.showAds = false;
+        } else if (p.productID === "disable_ads_week" || p.productID === "disable_ads_month") {
+          var adSpec = G.shopCoinPrices && G.shopCoinPrices[p.productID];
+          if (adSpec && adSpec.adsFreeMs && G.extendAdsFreePeriod) G.extendAdsFreePeriod(adSpec.adsFreeMs);
+          payments.consumePurchase(p.purchaseToken);
         } else if (p.productID.startsWith("skin_")) {
           if (G.ownedSkins.indexOf(p.productID) === -1) G.ownedSkins.push(p.productID);
           payments.consumePurchase(p.purchaseToken);
@@ -82,6 +86,10 @@
     G.payments.purchase({ id: productId }).then(function (purchase) {
       if (productId === "disable_ads") {
         G.showAds = false;
+      } else if (productId === "disable_ads_week" || productId === "disable_ads_month") {
+        var spec = G.shopCoinPrices && G.shopCoinPrices[productId];
+        if (spec && spec.adsFreeMs && G.extendAdsFreePeriod) G.extendAdsFreePeriod(spec.adsFreeMs);
+        G.payments.consumePurchase(purchase.purchaseToken);
       } else if (productId.startsWith("skin_")) {
         if (G.ownedSkins.indexOf(productId) === -1) G.ownedSkins.push(productId);
         G.applySkin(productId);

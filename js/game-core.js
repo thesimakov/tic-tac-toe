@@ -53,6 +53,14 @@ window.Game = window.Game || {};
       shopCourierNotice: "Ожидаем курьера с товаром. Зайдите позже, или подпишитесь на нашу группу в ВК.",
       subscribeVk: "Подписаться",
       disableAds: "Без рекламы", disableAdsDesc: "Отключить всю рекламу",
+      disableAdsWeek: "Без рекламы · неделя",
+      disableAdsWeekDesc: "7 дней без рекламы — 2 монеты",
+      disableAdsMonth: "Без рекламы · месяц",
+      disableAdsMonthDesc: "30 дней без рекламы — 5 монет",
+      shopBuyCoinsTitle: "Купить монетки",
+      shopBuyCoinsTopUp5: "5 монет — 5 голосов",
+      shopBuyCoinsTopUp10: "10 монет — 10 голосов",
+      shopBuyCoinsTopUp20: "20 монет — 15 голосов",
       skinNeon: "Тема: Неон", skinNeonDesc: "Неоновая тема оформления",
       skinWood: "Тема: Дерево", skinWoodDesc: "Деревянная тема оформления",
       skinSpace: "Тема: Космос", skinSpaceDesc: "Космическая тема оформления",
@@ -166,6 +174,14 @@ window.Game = window.Game || {};
       shopCourierNotice: "We're waiting for the courier with your order. Check back later or join our VK group.",
       subscribeVk: "Subscribe",
       disableAds: "No Ads", disableAdsDesc: "Disable all ads",
+      disableAdsWeek: "No ads · 1 week",
+      disableAdsWeekDesc: "7 days without ads — 2 coins",
+      disableAdsMonth: "No ads · 1 month",
+      disableAdsMonthDesc: "30 days without ads — 5 coins",
+      shopBuyCoinsTitle: "Buy coins",
+      shopBuyCoinsTopUp5: "5 coins — 5 votes",
+      shopBuyCoinsTopUp10: "10 coins — 10 votes",
+      shopBuyCoinsTopUp20: "20 coins — 15 votes",
       skinNeon: "Theme: Neon", skinNeonDesc: "Neon color theme",
       skinWood: "Theme: Wood", skinWoodDesc: "Wooden color theme",
       skinSpace: "Theme: Space", skinSpaceDesc: "Space color theme",
@@ -368,6 +384,10 @@ window.Game = window.Game || {};
   };
 
   G.shopCoinPacks = [
+    { id: "coins_2", coins: 2, votes: 2 },
+    { id: "coins_5", coins: 5, votes: 5 },
+    { id: "coins_10", coins: 10, votes: 10 },
+    { id: "coins_20", coins: 20, votes: 15 },
     { id: "coins_15", coins: 15, votes: 1 },
     { id: "coins_50", coins: 50, votes: 3 },
     { id: "coins_150", coins: 150, votes: 9 },
@@ -378,7 +398,8 @@ window.Game = window.Game || {};
 
   /** Цены в монетах внутриигровые (1 монета = 1 голосу для скинов). Темы — аренда на сутки. */
   G.shopCoinPrices = {
-    disable_ads: { coins: 14, perDay: false },
+    disable_ads_week: { coins: 2, perDay: false, adsFreeMs: SHOP_ADS_WEEK_MS },
+    disable_ads_month: { coins: 5, perDay: false, adsFreeMs: SHOP_ADS_MONTH_MS },
     skin_wood: { coins: 5, perDay: true },
     skin_space: { coins: 10, perDay: true }
   };
@@ -446,8 +467,9 @@ window.Game = window.Game || {};
       return;
     }
     G.coins = Math.max(0, Math.floor(G.coins - cost));
-    if (productId === "disable_ads") {
-      G.showAds = false;
+    if (productId === "disable_ads_week" || productId === "disable_ads_month") {
+      var adSpec = G.shopCoinPrices && G.shopCoinPrices[productId];
+      if (adSpec && adSpec.adsFreeMs && G.extendAdsFreePeriod) G.extendAdsFreePeriod(adSpec.adsFreeMs);
     } else if (String(productId).indexOf("skin_") === 0) {
       if (!G.skinLeaseExpiry) G.skinLeaseExpiry = {};
       var prev = G.skinLeaseExpiry[productId] || 0;
